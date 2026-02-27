@@ -1,29 +1,11 @@
-import React, { useContext } from 'react'
-import NoteContext from "../context/notes/NoteContext"
-
-
 const Noteitem = (props) => {
-    const context = useContext(NoteContext);
-    const { deleteNote } = context;
-    const { note, updateNote } = props;
+    const { note, updateNote, onDelete, timestampText } = props;
 
     const noteId = note?.id ?? note?._id;
     const title = note?.title ?? '';
 
     const content = note?.content ?? '';
     const tag = note?.tag ?? '';
-    const createdAt = note?.created_at ?? null;
-    const updatedAt = note?.updated_at ?? null;
-
-    const formatDateTime = (value) => {
-        if (!value) return null;
-        const d = new Date(value);
-        if (Number.isNaN(d.getTime())) return null;
-        return d.toLocaleString();
-    };
-
-    const createdLabel = formatDateTime(createdAt);
-    const updatedLabel = formatDateTime(updatedAt);
     return (
         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
             <div className="card my-3">
@@ -38,7 +20,7 @@ const Noteitem = (props) => {
                                 className="far fa-trash-alt mx-2"
                                 role="button"
                                 aria-label="Delete note"
-                                onClick={() => { if (noteId != null) deleteNote(noteId) }}
+                                onClick={() => { if (noteId != null) onDelete(noteId) }}
                             ></i>
                             <i
                                 className="far fa-edit mx-2"
@@ -49,12 +31,7 @@ const Noteitem = (props) => {
                         </div>
                     </div>
                     <p className="card-text mt-2 mb-0">{content}</p>
-                    {(createdLabel || updatedLabel) ? (
-                        <div className="mt-2">
-                            {createdLabel ? <small className="text-muted d-block">Created: {createdLabel}</small> : null}
-                            {updatedLabel ? <small className="text-muted d-block">Updated: {updatedLabel}</small> : null}
-                        </div>
-                    ) : null}
+                    {timestampText ? <small className="text-muted d-block mt-2">{timestampText}</small> : null}
 
                 </div>
             </div>

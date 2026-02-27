@@ -104,6 +104,7 @@ const NoteState = (props) => {
                     newNotes[i].title = title;
                     newNotes[i].content = content;
                     newNotes[i].tag = tag;
+                    newNotes[i].updated_at = new Date().toISOString();
                     break;
                 }
             }

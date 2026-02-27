@@ -64,11 +64,48 @@ const Notes = () => {
 
     const notesToRender = Array.isArray(notes) ? notes : [];
 
+    const formatDateTime = (value) => {
+        if (!value) return null;
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return null;
+        return d.toLocaleString();
+    };
+
+    const getMs = (value) => {
+        if (!value) return NaN;
+        const t = Date.parse(value);
+        return Number.isFinite(t) ? t : NaN;
+    };
+
+    const getTimestampText = (n) => {
+        const createdMs = getMs(n?.created_at);
+        const updatedMs = getMs(n?.updated_at);
+
+        const createdLabel = formatDateTime(n?.created_at);
+        const updatedLabel = formatDateTime(n?.updated_at);
+
+        if (createdLabel && updatedLabel && Number.isFinite(createdMs) && Number.isFinite(updatedMs)) {
+            if (createdMs === updatedMs) return `Created: ${createdLabel}`;
+            return `Created: ${createdLabel} | Updated: ${updatedLabel}`;
+        }
+
+        if (createdLabel && updatedLabel) {
+            if (n?.created_at === n?.updated_at) return `Created: ${createdLabel}`;
+            return `Created: ${createdLabel} | Updated: ${updatedLabel}`;
+        }
+
+        if (createdLabel) return `Created: ${createdLabel}`;
+        if (updatedLabel) return `Updated: ${updatedLabel}`;
+        return '';
+    };
+
     const sortedNotes = useMemo(() => {
         const getTime = (n) => {
-            const raw = n?.created_at ?? n?.updated_at ?? null;
-            const t = raw ? Date.parse(raw) : NaN;
-            return Number.isFinite(t) ? t : 0;
+            const tUpdated = getMs(n?.updated_at);
+            if (Number.isFinite(tUpdated)) return tUpdated;
+            const tCreated = getMs(n?.created_at);
+            if (Number.isFinite(tCreated)) return tCreated;
+            return 0;
         };
 
         return [...notesToRender].sort((a, b) => getTime(b) - getTime(a));
@@ -124,7 +161,15 @@ const Notes = () => {
                 </div>
                 {!loading && !error && sortedNotes.map((note, idx) => {
                     const key = note?.id ?? note?._id ?? idx;
-                    return <Noteitem key={key} updateNote={updateNote} note={note} />
+                    return (
+                        <Noteitem
+                            key={key}
+                            note={note}
+                            updateNote={updateNote}
+                            onDelete={deleteNote}
+                            timestampText={getTimestampText(note)}
+                        />
+                    )
                 })}
             </div>
         </>
