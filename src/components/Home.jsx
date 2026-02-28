@@ -1,12 +1,12 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
 import Notes from "./Notes";
+import PublicHome from "./PublicHome";
 
 const Home = () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        return <Navigate to="/login" />;
+        return <PublicHome />;
     }
 
     return <Notes />;
