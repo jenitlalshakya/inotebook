@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE = "http://localhost:8000/api/accounts/auth";
+const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 const MIN_PASSWORD_LENGTH = 6;
 
 const Profile = () => {
@@ -31,7 +31,7 @@ const Profile = () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await fetch(`${API_BASE}/profile/`, {
+                const response = await fetch(`${API_BASE}/api/accounts/auth/profile/`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -86,7 +86,7 @@ const Profile = () => {
         setDeleteLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${API_BASE}/delete-account/`, {
+            const response = await fetch(`${API_BASE}/api/accounts/auth/delete-account/`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -156,7 +156,7 @@ const Profile = () => {
 
         setChangePasswordLoading(true);
         try {
-            const response = await fetch(`${API_BASE}/change-password/`, {
+            const response = await fetch(`${API_BASE}/api/accounts/auth/change-password/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

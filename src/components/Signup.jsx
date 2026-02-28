@@ -5,6 +5,8 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 6;
 
 const Signup = () => {
+    const host = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -79,7 +81,7 @@ const Signup = () => {
 
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:8000/api/accounts/auth/signup/", {
+            const response = await fetch(`${host}/api/accounts/auth/signup/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
