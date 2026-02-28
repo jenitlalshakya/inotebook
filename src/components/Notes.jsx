@@ -18,6 +18,7 @@ const Notes = () => {
     const initialLoadDone = useRef(false);
     const ref = useRef(null)
     const refClose = useRef(null)
+    const ownerName = localStorage.getItem("name");
 
     const fetchNotes = useCallback(async () => {
         if (loading) return;
@@ -168,7 +169,7 @@ const Notes = () => {
             </div>
 
             <div className="row my-3">
-                <h2>Your Notes</h2>
+                <h2>Your Notes {ownerName && `(Owner: ${ownerName})`}</h2>
                 <div className="container mx-2">
                     {isInitialLoad && loading && <p>Loading notes...</p>}
                     {!loading && error && (
