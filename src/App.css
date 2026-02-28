@@ -34,6 +34,23 @@
   }
 }
 
+/* Auth pages: clear fixed navbar and add breathing room */
+.auth-page {
+  padding-top: 5.5rem;
+}
+
+@media (max-width: 991.98px) {
+  .auth-page {
+    padding-top: 5.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .auth-page {
+    padding-top: 5rem;
+  }
+}
+
 /* App layout for sticky footer */
 .app-layout {
   display: flex;
