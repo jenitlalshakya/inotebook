@@ -124,6 +124,67 @@
   }
 }
 
+/* About page */
+.about-page {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.about-page__card {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  border: 1px solid #dee2e6;
+}
+
+.about-page__title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.about-page__section {
+  margin-bottom: 1.5rem;
+}
+
+.about-page__section:last-child {
+  margin-bottom: 0;
+}
+
+.about-page__heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.5rem;
+}
+
+.about-page__text {
+  color: #495057;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.about-page__list {
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.about-page__list li {
+  margin-bottom: 0.35rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 576px) {
+  .about-page__card {
+    padding: 1.5rem;
+  }
+
+  .about-page__title {
+    font-size: 1.5rem;
+  }
+}
+
 /* Profile page */
 .profile-page {
   max-width: 560px;
