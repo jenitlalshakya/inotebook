@@ -2,12 +2,22 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE = "http://localhost:8000/api/accounts/auth";
+const MIN_PASSWORD_LENGTH = 6;
 
 const Profile = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+    });
+    const [passwordErrors, setPasswordErrors] = useState({});
+    const [passwordSuccess, setPasswordSuccess] = useState(null);
+    const [showPasswords, setShowPasswords] = useState(false);
+    const [changePasswordLoading, setChangePasswordLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -101,6 +111,85 @@ const Profile = () => {
         }
     };
 
+    const validatePasswordForm = () => {
+        const errs = {};
+        if (!passwordForm.currentPassword) {
+            errs.currentPassword = "Current password is required.";
+        }
+        if (!passwordForm.newPassword) {
+            errs.newPassword = "New password is required.";
+        } else if (passwordForm.newPassword.length < MIN_PASSWORD_LENGTH) {
+            errs.newPassword = `New password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
+        }
+        if (!passwordForm.confirmPassword) {
+            errs.confirmPassword = "Please confirm your new password.";
+        } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            errs.confirmPassword = "Passwords do not match.";
+        }
+        setPasswordErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
+    const handlePasswordChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordForm((prev) => ({ ...prev, [name]: value }));
+        setPasswordErrors((prev) => {
+            const { submit, ...rest } = prev;
+            return { ...rest, [name]: "" };
+        });
+        setPasswordSuccess(null);
+        setError(null);
+    };
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        setPasswordSuccess(null);
+        setError(null);
+
+        if (!validatePasswordForm()) return;
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
+        setChangePasswordLoading(true);
+        try {
+            const response = await fetch(`${API_BASE}/change-password/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    old_password: passwordForm.currentPassword,
+                    new_password: passwordForm.newPassword,
+                }),
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.success === false) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("name");
+                    navigate("/login");
+                    return;
+                }
+                setPasswordErrors({ submit: data.error || "Failed to change password. Please try again." });
+                return;
+            }
+
+            setPasswordSuccess("Password changed successfully.");
+            setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+        } catch (err) {
+            setPasswordErrors({ submit: "Unable to connect to the server. Please try again." });
+        } finally {
+            setChangePasswordLoading(false);
+        }
+    };
+
     const formatDate = (isoString) => {
         if (!isoString) return null;
         const d = new Date(isoString);
@@ -180,6 +269,99 @@ const Profile = () => {
                             >
                                 Logout
                             </button>
+                        </div>
+
+                        <div className="profile-card__section profile-card__change-password">
+                            <h3 className="profile-card__section-title">Change Password</h3>
+                            {passwordSuccess && (
+                                <div className="alert alert-success" role="alert">
+                                    {passwordSuccess}
+                                </div>
+                            )}
+                            {passwordErrors.submit && (
+                                <div className="alert alert-danger" role="alert">
+                                    {passwordErrors.submit}
+                                </div>
+                            )}
+                            <form onSubmit={handleChangePassword} noValidate>
+                                <div className="mb-3 position-relative">
+                                    <label htmlFor="currentPassword" className="form-label">
+                                        Current Password
+                                    </label>
+                                    <input
+                                        type={showPasswords ? "text" : "password"}
+                                        className={`form-control ${passwordErrors.currentPassword ? "is-invalid" : ""}`}
+                                        id="currentPassword"
+                                        name="currentPassword"
+                                        value={passwordForm.currentPassword}
+                                        onChange={handlePasswordChange}
+                                        autoComplete="current-password"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary btn-sm position-absolute"
+                                        style={{ top: "38px", right: "10px" }}
+                                        onClick={() => setShowPasswords((p) => !p)}
+                                    >
+                                        {showPasswords ? "Hide" : "Show"}
+                                    </button>
+                                    {passwordErrors.currentPassword && (
+                                        <div className="invalid-feedback d-block">{passwordErrors.currentPassword}</div>
+                                    )}
+                                </div>
+                                <div className="mb-3 position-relative">
+                                    <label htmlFor="newPassword" className="form-label">
+                                        New Password
+                                    </label>
+                                    <input
+                                        type={showPasswords ? "text" : "password"}
+                                        className={`form-control ${passwordErrors.newPassword ? "is-invalid" : ""}`}
+                                        id="newPassword"
+                                        name="newPassword"
+                                        value={passwordForm.newPassword}
+                                        onChange={handlePasswordChange}
+                                        autoComplete="new-password"
+                                    />
+                                    {passwordErrors.newPassword && (
+                                        <div className="invalid-feedback d-block">{passwordErrors.newPassword}</div>
+                                    )}
+                                </div>
+                                <div className="mb-3 position-relative">
+                                    <label htmlFor="confirmPassword" className="form-label">
+                                        Confirm New Password
+                                    </label>
+                                    <input
+                                        type={showPasswords ? "text" : "password"}
+                                        className={`form-control ${passwordErrors.confirmPassword ? "is-invalid" : ""}`}
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        value={passwordForm.confirmPassword}
+                                        onChange={handlePasswordChange}
+                                        autoComplete="new-password"
+                                    />
+                                    {passwordErrors.confirmPassword && (
+                                        <div className="invalid-feedback d-block">{passwordErrors.confirmPassword}</div>
+                                    )}
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={changePasswordLoading}
+                                >
+                                    {changePasswordLoading ? (
+                                        <>
+                                            <span
+                                                className="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true"
+                                            />
+                                            Changing...
+                                        </>
+                                    ) : (
+                                        "Change Password"
+                                    )}
+                                </button>
+                            </form>
                         </div>
 
                         <div className="profile-card__danger-zone">
