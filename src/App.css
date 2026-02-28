@@ -33,3 +33,57 @@
     transform: rotate(360deg);
   }
 }
+
+/* App layout for sticky footer */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-main {
+  flex: 1;
+}
+
+/* Footer */
+.site-footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 1rem 1.5rem;
+  background-color: #e9ecef;
+  color: #495057;
+  border-top: 1px solid #dee2e6;
+}
+
+.site-footer__content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.site-footer__copyright,
+.site-footer__credit {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.site-footer__copyright {
+  font-weight: 500;
+}
+
+.site-footer__credit {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+@media (max-width: 576px) {
+  .site-footer {
+    padding: 0.875rem 1rem;
+  }
+
+  .site-footer__copyright,
+  .site-footer__credit {
+    font-size: 0.8rem;
+  }
+}
