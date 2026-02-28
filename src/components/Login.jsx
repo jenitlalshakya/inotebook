@@ -76,6 +76,10 @@ const Login = () => {
             if (data.name) {
                 localStorage.setItem("name", data.name);
             }
+
+            if (data.email) {
+                localStorage.setItem("email", email);
+            }
             navigate("/");
         } catch (err) {
             setApiError("Unable to connect to the server. Please try again.");

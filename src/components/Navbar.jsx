@@ -29,6 +29,11 @@ const Navbar = (props) => {
                         <li className="nav-item">
                             <Link className={`nav-link ${location.pathname === "/about" ? "active" : ""}`} to="/about">About</Link>
                         </li>
+                        {token && (
+                            <li className="nav-item">
+                                <Link className={`nav-link ${location.pathname === "/profile" ? "active" : ""}`} to="/profile">Profile</Link>
+                            </li>
+                        )}
                     </ul>
 
                     <form className="d-flex">
