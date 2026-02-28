@@ -182,7 +182,7 @@ const Notes = () => {
                     next={fetchNotes}
                     hasMore={hasMore}
                     loader={<h4 className="my-3">Loading...</h4>}
-                    endMessage={safeNotes.length > 0 && !hasMore ? <p className="text-muted text-center my-3">You have seen all notes.</p> : null}
+                    endMessage={safeNotes.length > 0 && !hasMore ? <p className="text-muted text-center my-3">You have seen all notes. Total notes: {safeNotes.length}</p> : null}
                 >
                     <div className="d-flex flex-wrap">
                         {sortedNotes.map((n, idx) => {
