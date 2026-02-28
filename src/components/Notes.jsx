@@ -15,33 +15,60 @@ const Notes = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [editError, setEditError] = useState(null);
-    const initialLoadDone = useRef(false);
     const ref = useRef(null)
     const refClose = useRef(null)
     const ownerName = localStorage.getItem("name");
 
-    const fetchNotes = useCallback(async () => {
-        if (loading) return;
-        setLoading(true);
-        setError(null);
-        try {
-            const { hasMore: more } = await getNotes(LIMIT, page * LIMIT, true);
-            setHasMore(Boolean(more));
-            setPage((p) => p + 1);
-        } catch (err) {
-            console.error('Error fetching notes:', err);
-            setError(err?.message || 'Failed to load notes.');
-        } finally {
-            setLoading(false);
-        }
-    }, [getNotes, page, loading]);
+    const fetchNotes = useCallback(
+        async (signal = null) => {
+            if (loading) return;
+            setLoading(true);
+            setError(null);
+            // Initial load (page 0): replace notes. Load more (page > 0): append.
+            const append = page > 0;
+            try {
+                const { hasMore: more } = await getNotes(LIMIT, page * LIMIT, append, signal);
+                setHasMore(Boolean(more));
+                setPage((p) => p + 1);
+            } catch (err) {
+                if (err?.name === "AbortError") return;
+                console.error("Error fetching notes:", err);
+                setError(err?.message || "Failed to load notes.");
+            } finally {
+                setLoading(false);
+            }
+        },
+        [getNotes, page, loading]
+    );
 
     useEffect(() => {
-        if (!initialLoadDone.current) {
-            initialLoadDone.current = true;
-            fetchNotes();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: run only once on mount to load page 0
+        let mounted = true;
+        const controller = new AbortController();
+
+        const load = async () => {
+            if (loading) return;
+            setLoading(true);
+            setError(null);
+            try {
+                const { hasMore: more } = await getNotes(LIMIT, 0, false, controller.signal);
+                if (mounted) {
+                    setHasMore(Boolean(more));
+                    setPage(1);
+                }
+            } catch (err) {
+                if (err?.name === "AbortError") return;
+                if (mounted) setError(err?.message || "Failed to load notes.");
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+        load();
+
+        return () => {
+            mounted = false;
+            controller.abort();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on mount
     }, []);
 
     const updateNote = (currentNote) => {

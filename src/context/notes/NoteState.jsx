@@ -7,15 +7,19 @@ const NoteState = (props) => {
     const [notes, setNotes] = useState([]);
 
     // Get all Notes
-    const getNotes = async (limit = 20, skip = 0, append = false) => {
+    // append=false: replace notes (use for initial load when mounting). append=true: append (use for infinite scroll).
+    const getNotes = async (limit = 20, skip = 0, append = false, signal = null) => {
         try {
-            const response = await fetch(`${host}/api/notes/all/?limit=${limit}&skip=${skip}`, {
+            const fetchOptions = {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${localStorage.getItem("token")}`,
                 },
-            });
+            };
+            if (signal) fetchOptions.signal = signal;
+
+            const response = await fetch(`${host}/api/notes/all/?limit=${limit}&skip=${skip}`, fetchOptions);
 
             const data = await response.json();
 
@@ -37,6 +41,7 @@ const NoteState = (props) => {
                 hasMore: data.notes.length === limit,
             };
         } catch (error) {
+            if (error?.name === "AbortError") throw error;
             console.error("Error fetching notes:", error);
             if (append !== true) setNotes([]);
             return { newNotes: [], hasMore: false };
