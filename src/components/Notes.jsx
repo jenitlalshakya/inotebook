@@ -1,40 +1,47 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import InfiniteScroll from 'react-infinite-scroll-component'
 import NoteContext from "../context/notes/NoteContext"
 import Noteitem from './Noteitem';
-import AddNote from './AddNote';
+import AddNote from './Addnote';
+
+const LIMIT = 20;
 
 const Notes = () => {
     const context = useContext(NoteContext);
-    const { notes, addNote, editNote, deleteNote, getNotes } = context;
+    const { notes, editNote, deleteNote, getNotes } = context;
     const [note, setNote] = useState({ id: "", etitle: "", econtent: "", etag: "" })
-    const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [editError, setEditError] = useState(null);
+    const initialLoadDone = useRef(false);
     const ref = useRef(null)
     const refClose = useRef(null)
 
-    useEffect(() => {
-        const fetchNotes = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                await getNotes();
-            } catch (err) {
-                console.error('Error fetching notes:', err);
-                setError('Failed to load notes.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (typeof getNotes === 'function') {
-            fetchNotes();
-        } else {
-            console.error('getNotes is not a function');
+    const fetchNotes = useCallback(async () => {
+        if (loading) return;
+        setLoading(true);
+        setError(null);
+        try {
+            const { hasMore: more } = await getNotes(LIMIT, page * LIMIT, true);
+            setHasMore(Boolean(more));
+            setPage((p) => p + 1);
+        } catch (err) {
+            console.error('Error fetching notes:', err);
+            setError(err?.message || 'Failed to load notes.');
+        } finally {
             setLoading(false);
         }
-        // eslint-disable-next-line
-    }, [])
+    }, [getNotes, page, loading]);
+
+    useEffect(() => {
+        if (!initialLoadDone.current) {
+            initialLoadDone.current = true;
+            fetchNotes();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: run only once on mount to load page 0
+    }, []);
 
     const updateNote = (currentNote) => {
         setEditError(null);
@@ -47,10 +54,18 @@ const Notes = () => {
         })
     }
 
+    const handleDelete = useCallback(async (id) => {
+        try {
+            await deleteNote(id);
+        } catch (err) {
+            console.error('Error deleting note:', err);
+        }
+    }, [deleteNote]);
+
     const handleClick = async (e) => {
         setEditError(null);
         try {
-            await editNote(note.id, note.etitle, note.econtent, note.etag)
+            await editNote(note.id, note.etitle, note.econtent, note.etag);
             refClose.current.click();
         } catch (err) {
             console.error('Error updating note:', err);
@@ -61,8 +76,6 @@ const Notes = () => {
     const onChange = (e) => {
         setNote({ ...note, [e.target.name]: e.target.value })
     }
-
-    const notesToRender = Array.isArray(notes) ? notes : [];
 
     const formatDateTime = (value) => {
         if (!value) return null;
@@ -99,6 +112,8 @@ const Notes = () => {
         return '';
     };
 
+    const safeNotes = Array.isArray(notes) ? notes : [];
+
     const sortedNotes = useMemo(() => {
         const getTime = (n) => {
             const tUpdated = getMs(n?.updated_at);
@@ -108,8 +123,10 @@ const Notes = () => {
             return 0;
         };
 
-        return [...notesToRender].sort((a, b) => getTime(b) - getTime(a));
-    }, [notesToRender]);
+        return [...safeNotes].sort((a, b) => getTime(b) - getTime(a));
+    }, [safeNotes]);
+
+    const isInitialLoad = page === 0 && safeNotes.length === 0;
 
     return (
         <>
@@ -153,24 +170,34 @@ const Notes = () => {
             <div className="row my-3">
                 <h2>Your Notes</h2>
                 <div className="container mx-2">
-                    {loading && 'Loading notes...'}
+                    {isInitialLoad && loading && <p>Loading notes...</p>}
                     {!loading && error && (
                         <p className="text-danger">Unable to load notes. Please try again later.</p>
                     )}
-                    {!loading && !error && sortedNotes.length === 0 && 'No notes to display'}
+                    {!loading && !error && safeNotes.length === 0 && !isInitialLoad && <p>No notes to display</p>}
                 </div>
-                {!loading && !error && sortedNotes.map((note, idx) => {
-                    const key = note?.id ?? note?._id ?? idx;
-                    return (
-                        <Noteitem
-                            key={key}
-                            note={note}
-                            updateNote={updateNote}
-                            onDelete={deleteNote}
-                            timestampText={getTimestampText(note)}
-                        />
-                    )
-                })}
+                <InfiniteScroll
+                    dataLength={safeNotes.length}
+                    next={fetchNotes}
+                    hasMore={hasMore}
+                    loader={<h4 className="my-3">Loading...</h4>}
+                    endMessage={safeNotes.length > 0 && !hasMore ? <p className="text-muted text-center my-3">You have seen all notes.</p> : null}
+                >
+                    <div className="d-flex flex-wrap">
+                        {sortedNotes.map((n, idx) => {
+                            const key = n?.id ?? n?._id ?? idx;
+                            return (
+                                <Noteitem
+                                    key={key}
+                                    note={n}
+                                    updateNote={updateNote}
+                                    onDelete={handleDelete}
+                                    timestampText={getTimestampText(n)}
+                                />
+                            );
+                        })}
+                    </div>
+                </InfiniteScroll>
             </div>
         </>
     )

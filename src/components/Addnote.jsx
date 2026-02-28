@@ -25,7 +25,7 @@ const AddNote = () => {
                     <input type="text" className="form-control" id="title" name="title" aria-describedby="emailHelp" value={note.title} onChange={onChange} minLength={5} required />
                 </div>
                 <div className="mb-3">
-                    <label htmlFor="content" className="form-label">Description</label>
+                    <label htmlFor="content" className="form-label">Content</label>
                     <input type="text" className="form-control" id="content" name="content" value={note.content} onChange={onChange} minLength={5} required />
                 </div>
                 <div className="mb-3">

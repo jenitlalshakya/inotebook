@@ -7,9 +7,9 @@ const NoteState = (props) => {
     const [notes, setNotes] = useState([]);
 
     // Get all Notes
-    const getNotes = async () => {
+    const getNotes = async (limit = 20, skip = 0, append = false) => {
         try {
-            const response = await fetch(`${host}/api/notes/all/`, {
+            const response = await fetch(`${host}/api/notes/all/?limit=${limit}&skip=${skip}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -18,13 +18,28 @@ const NoteState = (props) => {
             });
 
             const data = await response.json();
-            console.log("Fetched notes:", data);
 
-            // Backend returns { success: true, notes: [...] }
-            setNotes(data.notes || []);
+            if (!response.ok) {
+                throw new Error(data?.error || `Request failed: ${response.status}`);
+            }
+            if (!data?.success || !Array.isArray(data?.notes)) {
+                throw new Error(data?.error || "Invalid notes response");
+            }
+
+            if (append === true) {
+                setNotes((prev) => [...prev, ...data.notes]);
+            } else {
+                setNotes(data.notes);
+            }
+
+            return {
+                newNotes: data.notes,
+                hasMore: data.notes.length === limit,
+            };
         } catch (error) {
             console.error("Error fetching notes:", error);
-            setNotes([]);
+            if (append !== true) setNotes([]);
+            return { newNotes: [], hasMore: false };
         }
     };
 
@@ -76,8 +91,7 @@ const NoteState = (props) => {
             const data = await response.json();
             console.log("Deleted note:", data);
 
-            const newNotes = notes.filter((note) => note.id !== id); // Use `id` from backend
-            setNotes(newNotes);
+            setNotes((prev) => prev.filter((note) => note.id !== id)); // Use `id` from backend
         } catch (error) {
             console.error("Error deleting note:", error);
         }
@@ -98,17 +112,20 @@ const NoteState = (props) => {
             const data = await response.json();
             console.log("Updated note:", data);
 
-            let newNotes = JSON.parse(JSON.stringify(notes));
-            for (let i = 0; i < newNotes.length; i++) {
-                if (newNotes[i].id === id) { // Use `id` from backend
-                    newNotes[i].title = title;
-                    newNotes[i].content = content;
-                    newNotes[i].tag = tag;
-                    newNotes[i].updated_at = new Date().toISOString();
-                    break;
-                }
-            }
-            setNotes(newNotes);
+            setNotes((prev) =>
+                prev.map((n) => {
+                    if (n?.id === id) {
+                        return {
+                            ...n,
+                            title,
+                            content,
+                            tag,
+                            updated_at: new Date().toISOString(),
+                        };
+                    }
+                    return n;
+                })
+            );
         } catch (error) {
             console.error("Error updating note:", error);
         }
