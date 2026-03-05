@@ -180,9 +180,16 @@ const Profile = () => {
                 setPasswordErrors({ submit: data.error || "Failed to change password. Please try again." });
                 return;
             }
-
-            setPasswordSuccess("Password changed successfully.");
+            
+            setPasswordSuccess("Password changed successfully. Redirecting you to login...");
             setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+
+            // Clear auth data and redirect to login after a short delay
+            localStorage.removeItem("token");
+            localStorage.removeItem("name");
+            setTimeout(() => {
+                navigate("/login");
+            }, 1500);
         } catch (err) {
             setPasswordErrors({ submit: "Unable to connect to the server. Please try again." });
         } finally {
