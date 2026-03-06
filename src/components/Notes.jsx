@@ -273,7 +273,7 @@ const Notes = () => {
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="Search notes... (title:, content:, tag:, combine with comma)"
+                        placeholder="Search notes... (title:, content:, tag:, combine with comma, use or to search for multiple keywords in the different fields)"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         aria-label="Search notes"
