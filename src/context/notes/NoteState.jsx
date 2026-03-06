@@ -48,6 +48,36 @@ const NoteState = (props) => {
         }
     };
 
+    // Search notes (dedicated API; does not touch notes state). Uses q= for encrypted-note search.
+    const searchNotes = async (q, limit = 20, skip = 0) => {
+        const trimmed = typeof q === "string" ? q.trim() : "";
+        if (!trimmed) {
+            return { notes: [], hasMore: false };
+        }
+        try {
+            const url = `${host}/api/notes/search/?q=${encodeURIComponent(trimmed)}&limit=${limit}&skip=${skip}`;
+            const response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data?.error || `Request failed: ${response.status}`);
+            }
+            if (!data?.success || !Array.isArray(data?.notes)) {
+                throw new Error(data?.error || "Invalid search response");
+            }
+            const notesList = data.notes || [];
+            return { notes: notesList, hasMore: notesList.length === limit };
+        } catch (error) {
+            console.error("Error searching notes:", error);
+            return { notes: [], hasMore: false };
+        }
+    };
+
     // Add a Note
     const addNote = async (title, content, tag) => {
         try {
@@ -137,7 +167,7 @@ const NoteState = (props) => {
     };
 
     return (
-        <NoteContext.Provider value={{ notes, addNote, deleteNote, editNote, getNotes }}>
+        <NoteContext.Provider value={{ notes, addNote, deleteNote, editNote, getNotes, searchNotes }}>
             {props.children}
         </NoteContext.Provider>
     );

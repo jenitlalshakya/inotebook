@@ -5,10 +5,11 @@ import Noteitem from './Noteitem';
 import AddNote from './Addnote';
 
 const LIMIT = 20;
+const SEARCH_DEBOUNCE_MS = 400;
 
 const Notes = () => {
     const context = useContext(NoteContext);
-    const { notes, editNote, deleteNote, getNotes } = context;
+    const { notes, editNote, deleteNote, getNotes, searchNotes } = context;
     const [note, setNote] = useState({ id: "", etitle: "", econtent: "", etag: "" })
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
@@ -19,12 +20,20 @@ const Notes = () => {
     const refClose = useRef(null)
     const ownerName = localStorage.getItem("name");
 
+    // --- Search state (isolated from normal notes) ---
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchSkip, setSearchSkip] = useState(0);
+    const [searchHasMore, setSearchHasMore] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const isSearchMode = (searchQuery || "").trim() !== "";
+
+    // Normal mode: existing fetch (unchanged)
     const fetchNotes = useCallback(
         async (signal = null) => {
             if (loading) return;
             setLoading(true);
             setError(null);
-            // Initial load (page 0): replace notes. Load more (page > 0): append.
             const append = page > 0;
             try {
                 const { hasMore: more } = await getNotes(LIMIT, page * LIMIT, append, signal);
@@ -40,6 +49,26 @@ const Notes = () => {
         },
         [getNotes, page, loading]
     );
+
+    // Search mode: fetch more search results (only when searchSkip > 0; first page is done by debounce)
+    const fetchSearchNotes = useCallback(async () => {
+        if (!isSearchMode || searchLoading) return;
+        const q = (searchQuery || "").trim();
+        if (!q) return;
+        if (searchSkip === 0) return;
+        setSearchLoading(true);
+        try {
+            const { notes: nextNotes, hasMore: more } = await searchNotes(q, LIMIT, searchSkip);
+            setSearchResults((prev) => [...prev, ...nextNotes]);
+            setSearchSkip((s) => s + LIMIT);
+            setSearchHasMore(Boolean(more));
+        } catch (err) {
+            console.error("Error fetching search notes:", err);
+            setSearchHasMore(false);
+        } finally {
+            setSearchLoading(false);
+        }
+    }, [isSearchMode, searchQuery, searchSkip, searchLoading, searchNotes]);
 
     useEffect(() => {
         let mounted = true;
@@ -70,6 +99,38 @@ const Notes = () => {
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on mount
     }, []);
+
+    // When search query changes while in search mode: reset so debounce can refetch first page
+    useEffect(() => {
+        if (isSearchMode) {
+            setSearchResults([]);
+            setSearchSkip(0);
+            setSearchHasMore(false);
+            setSearchLoading(true);
+        }
+    }, [searchQuery]);
+
+    // Debounced first-page search: 400ms after user stops typing, call search API
+    useEffect(() => {
+        const q = (searchQuery || "").trim();
+        if (!q) return;
+        const t = setTimeout(async () => {
+            setSearchLoading(true);
+            try {
+                const { notes: firstNotes, hasMore: more } = await searchNotes(q, LIMIT, 0);
+                setSearchResults(firstNotes || []);
+                setSearchSkip(LIMIT);
+                setSearchHasMore(Boolean(more));
+            } catch (err) {
+                console.error("Error searching notes:", err);
+                setSearchResults([]);
+                setSearchHasMore(false);
+            } finally {
+                setSearchLoading(false);
+            }
+        }, SEARCH_DEBOUNCE_MS);
+        return () => clearTimeout(t);
+    }, [searchQuery, searchNotes]);
 
     const updateNote = (currentNote) => {
         setEditError(null);
@@ -154,6 +215,17 @@ const Notes = () => {
         return [...safeNotes].sort((a, b) => getTime(b) - getTime(a));
     }, [safeNotes]);
 
+    const sortedSearchResults = useMemo(() => {
+        const getTime = (n) => {
+            const tUpdated = getMs(n?.updated_at);
+            if (Number.isFinite(tUpdated)) return tUpdated;
+            const tCreated = getMs(n?.created_at);
+            if (Number.isFinite(tCreated)) return tCreated;
+            return 0;
+        };
+        return [...searchResults].sort((a, b) => getTime(b) - getTime(a));
+    }, [searchResults]);
+
     const isInitialLoad = page === 0 && safeNotes.length === 0;
 
     return (
@@ -197,35 +269,73 @@ const Notes = () => {
 
             <div className="row my-3">
                 <h2>Your Notes {ownerName && `(Owner: ${ownerName})`}</h2>
+                <div className="container mx-2 mb-2">
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search notes... (title:, content:, tag:, combine with comma)"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        aria-label="Search notes"
+                    />
+                </div>
                 <div className="container mx-2">
-                    {isInitialLoad && loading && <p>Loading notes...</p>}
-                    {!loading && error && (
+                    {!isSearchMode && isInitialLoad && loading && <p>Loading notes...</p>}
+                    {!isSearchMode && !loading && error && (
                         <p className="text-danger">Unable to load notes. Please try again later.</p>
                     )}
-                    {!loading && !error && safeNotes.length === 0 && !isInitialLoad && <p>No notes to display</p>}
+                    {!isSearchMode && !loading && !error && safeNotes.length === 0 && !isInitialLoad && <p>No notes to display</p>}
+                    {isSearchMode && searchLoading && searchResults.length === 0 && <p>Searching...</p>}
+                    {isSearchMode && !searchLoading && searchResults.length === 0 && (searchQuery || "").trim() && <p>No notes found</p>}
                 </div>
-                <InfiniteScroll
-                    dataLength={safeNotes.length}
-                    next={fetchNotes}
-                    hasMore={hasMore}
-                    loader={<h4 className="my-3">Loading...</h4>}
-                    endMessage={safeNotes.length > 0 && !hasMore ? <p className="text-muted text-center my-3">You have seen all notes. Total notes: {safeNotes.length}</p> : null}
-                >
-                    <div className="d-flex flex-wrap">
-                        {sortedNotes.map((n, idx) => {
-                            const key = n?.id ?? n?._id ?? idx;
-                            return (
-                                <Noteitem
-                                    key={key}
-                                    note={n}
-                                    updateNote={updateNote}
-                                    onDelete={handleDelete}
-                                    timestampText={getTimestampText(n)}
-                                />
-                            );
-                        })}
-                    </div>
-                </InfiniteScroll>
+
+                {isSearchMode ? (
+                    <InfiniteScroll
+                        dataLength={searchResults.length}
+                        next={fetchSearchNotes}
+                        hasMore={searchHasMore}
+                        loader={searchLoading ? <h4 className="my-3">Loading...</h4> : null}
+                        endMessage={searchResults.length > 0 && !searchHasMore ? <p className="text-muted text-center my-3">End of search results. Total: {searchResults.length}</p> : null}
+                    >
+                        <div className="d-flex flex-wrap">
+                            {sortedSearchResults.map((n, idx) => {
+                                const key = n?.id ?? n?._id ?? idx;
+                                return (
+                                    <Noteitem
+                                        key={key}
+                                        note={n}
+                                        updateNote={updateNote}
+                                        onDelete={handleDelete}
+                                        timestampText={getTimestampText(n)}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </InfiniteScroll>
+                ) : (
+                    <InfiniteScroll
+                        dataLength={safeNotes.length}
+                        next={fetchNotes}
+                        hasMore={hasMore}
+                        loader={<h4 className="my-3">Loading...</h4>}
+                        endMessage={safeNotes.length > 0 && !hasMore ? <p className="text-muted text-center my-3">You have seen all notes. Total notes: {safeNotes.length}</p> : null}
+                    >
+                        <div className="d-flex flex-wrap">
+                            {sortedNotes.map((n, idx) => {
+                                const key = n?.id ?? n?._id ?? idx;
+                                return (
+                                    <Noteitem
+                                        key={key}
+                                        note={n}
+                                        updateNote={updateNote}
+                                        onDelete={handleDelete}
+                                        timestampText={getTimestampText(n)}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </InfiniteScroll>
+                )}
             </div>
         </>
     )
