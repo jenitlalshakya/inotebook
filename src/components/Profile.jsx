@@ -16,7 +16,9 @@ const Profile = () => {
     });
     const [passwordErrors, setPasswordErrors] = useState({});
     const [passwordSuccess, setPasswordSuccess] = useState(null);
-    const [showPasswords, setShowPasswords] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [changePasswordLoading, setChangePasswordLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -291,61 +293,92 @@ const Profile = () => {
                                 </div>
                             )}
                             <form onSubmit={handleChangePassword} noValidate>
-                                <div className="mb-3 position-relative">
+                                <div className="mb-3">
                                     <label htmlFor="currentPassword" className="form-label">
                                         Current Password
                                     </label>
-                                    <input
-                                        type={showPasswords ? "text" : "password"}
-                                        className={`form-control ${passwordErrors.currentPassword ? "is-invalid" : ""}`}
-                                        id="currentPassword"
-                                        name="currentPassword"
-                                        value={passwordForm.currentPassword}
-                                        onChange={handlePasswordChange}
-                                        autoComplete="current-password"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-secondary btn-sm position-absolute"
-                                        style={{ top: "38px", right: "10px" }}
-                                        onClick={() => setShowPasswords((p) => !p)}
-                                    >
-                                        {showPasswords ? "Hide" : "Show"}
-                                    </button>
+                                    <div className="input-group">
+                                        <input
+                                            type={showCurrentPassword ? "text" : "password"}
+                                            className={`form-control ${passwordErrors.currentPassword ? "is-invalid" : ""}`}
+                                            id="currentPassword"
+                                            name="currentPassword"
+                                            value={passwordForm.currentPassword}
+                                            onChange={handlePasswordChange}
+                                            autoComplete="current-password"
+                                        />
+                                        <span
+                                            className="input-group-text"
+                                            style={{ cursor: "pointer" }}
+                                            onClick={() => setShowCurrentPassword((prev) => !prev)}
+                                        >
+                                            <i
+                                                className={`bi ${
+                                                    showCurrentPassword ? "bi-eye-slash" : "bi-eye"
+                                                }`}
+                                            ></i>
+                                        </span>
+                                    </div>
                                     {passwordErrors.currentPassword && (
                                         <div className="invalid-feedback d-block">{passwordErrors.currentPassword}</div>
                                     )}
                                 </div>
-                                <div className="mb-3 position-relative">
+                                <div className="mb-3">
                                     <label htmlFor="newPassword" className="form-label">
                                         New Password
                                     </label>
-                                    <input
-                                        type={showPasswords ? "text" : "password"}
-                                        className={`form-control ${passwordErrors.newPassword ? "is-invalid" : ""}`}
-                                        id="newPassword"
-                                        name="newPassword"
-                                        value={passwordForm.newPassword}
-                                        onChange={handlePasswordChange}
-                                        autoComplete="new-password"
-                                    />
+                                    <div className="input-group">
+                                        <input
+                                            type={showNewPassword ? "text" : "password"}
+                                            className={`form-control ${passwordErrors.newPassword ? "is-invalid" : ""}`}
+                                            id="newPassword"
+                                            name="newPassword"
+                                            value={passwordForm.newPassword}
+                                            onChange={handlePasswordChange}
+                                            autoComplete="new-password"
+                                        />
+                                        <span
+                                            className="input-group-text"
+                                            style={{ cursor: "pointer" }}
+                                            onClick={() => setShowNewPassword((prev) => !prev)}
+                                        >
+                                            <i
+                                                className={`bi ${
+                                                    showNewPassword ? "bi-eye-slash" : "bi-eye"
+                                                }`}
+                                            ></i>
+                                        </span>
+                                    </div>
                                     {passwordErrors.newPassword && (
                                         <div className="invalid-feedback d-block">{passwordErrors.newPassword}</div>
                                     )}
                                 </div>
-                                <div className="mb-3 position-relative">
+                                <div className="mb-3">
                                     <label htmlFor="confirmPassword" className="form-label">
                                         Confirm New Password
                                     </label>
-                                    <input
-                                        type={showPasswords ? "text" : "password"}
-                                        className={`form-control ${passwordErrors.confirmPassword ? "is-invalid" : ""}`}
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        value={passwordForm.confirmPassword}
-                                        onChange={handlePasswordChange}
-                                        autoComplete="new-password"
-                                    />
+                                    <div className="input-group">
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            className={`form-control ${passwordErrors.confirmPassword ? "is-invalid" : ""}`}
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            value={passwordForm.confirmPassword}
+                                            onChange={handlePasswordChange}
+                                            autoComplete="new-password"
+                                        />
+                                        <span
+                                            className="input-group-text"
+                                            style={{ cursor: "pointer" }}
+                                            onClick={() => setShowConfirmPassword((prev) => !prev)}
+                                        >
+                                            <i
+                                                className={`bi ${
+                                                    showConfirmPassword ? "bi-eye-slash" : "bi-eye"
+                                                }`}
+                                            ></i>
+                                        </span>
+                                    </div>
                                     {passwordErrors.confirmPassword && (
                                         <div className="invalid-feedback d-block">{passwordErrors.confirmPassword}</div>
                                     )}

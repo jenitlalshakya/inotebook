@@ -167,53 +167,55 @@ const Signup = () => {
                     {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                 </div>
 
-                <div className="mb-3 position-relative">
+                <div className="mb-3">
                     <label htmlFor="password" className="form-label">
                         Password
                     </label>
-                    <input
-                        type={showPassword ? "text" : "password"}
-                        className={`form-control ${errors.password ? "is-invalid" : ""}`}
-                        id="password"
-                        name="password"
-                        value={form.password}
-                        onChange={handleChange}
-                        autoComplete="new-password"
-                    />
-                    <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm position-absolute"
-                        style={{ top: "38px", right: "10px" }}
-                        onClick={() => setShowPassword((prev) => !prev)}
-                    >
-                        {showPassword ? "Hide" : "Show"}
-                    </button>
+                    <div className="input-group">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            className={`form-control ${errors.password ? "is-invalid" : ""}`}
+                            id="password"
+                            name="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            autoComplete="new-password"
+                        />
+                        <span
+                            className="input-group-text"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setShowPassword((prev) => !prev)}
+                        >
+                            <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                        </span>
+                    </div>
                     {errors.password && (
                         <div className="invalid-feedback d-block">{errors.password}</div>
                     )}
                 </div>
 
-                <div className="mb-3 position-relative">
+                <div className="mb-3">
                     <label htmlFor="confirmPassword" className="form-label">
                         Confirm Password
                     </label>
-                    <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        value={form.confirmPassword}
-                        onChange={handleChange}
-                        autoComplete="new-password"
-                    />
-                    <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm position-absolute"
-                        style={{ top: "38px", right: "10px" }}
-                        onClick={() => setShowConfirmPassword((prev) => !prev)}
-                    >
-                        {showConfirmPassword ? "Hide" : "Show"}
-                    </button>
+                    <div className="input-group">
+                        <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            value={form.confirmPassword}
+                            onChange={handleChange}
+                            autoComplete="new-password"
+                        />
+                        <span
+                            className="input-group-text"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setShowConfirmPassword((prev) => !prev)}
+                        >
+                            <i className={`bi ${showConfirmPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                        </span>
+                    </div>
                     {errors.confirmPassword && (
                         <div className="invalid-feedback d-block">
                             {errors.confirmPassword}

@@ -120,27 +120,28 @@ const Login = () => {
                     {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                 </div>
 
-                <div className="mb-3 position-relative">
+                <div className="mb-3">
                     <label htmlFor="password" className="form-label">
                         Password
                     </label>
-                    <input
-                        type={showPassword ? "text" : "password"}
-                        className={`form-control ${errors.password ? "is-invalid" : ""}`}
-                        id="password"
-                        name="password"
-                        value={form.password}
-                        onChange={handleChange}
-                        autoComplete="current-password"
-                    />
-                    <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm position-absolute"
-                        style={{ top: "38px", right: "10px" }}
-                        onClick={() => setShowPassword((prev) => !prev)}
-                    >
-                        {showPassword ? "Hide" : "Show"}
-                    </button>
+                    <div className="input-group">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            className={`form-control ${errors.password ? "is-invalid" : ""}`}
+                            id="password"
+                            name="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            autoComplete="current-password"
+                        />
+                        <span
+                            className="input-group-text"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setShowPassword((prev) => !prev)}
+                        >
+                            <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                        </span>
+                    </div>
                     {errors.password && (
                         <div className="invalid-feedback d-block">{errors.password}</div>
                     )}
