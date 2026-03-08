@@ -1,23 +1,22 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import NoteContext from "../context/notes/NoteContext"
 import Noteitem from './Noteitem';
 import AddNote from './Addnote';
+import NoteModal from './NoteModal';
 
 const LIMIT = 20;
 const SEARCH_DEBOUNCE_MS = 400;
 
 const Notes = () => {
     const context = useContext(NoteContext);
-    const { notes, editNote, deleteNote, getNotes, searchNotes } = context;
-    const [note, setNote] = useState({ id: "", etitle: "", econtent: "", etag: "" })
+    const { notes, deleteNote, getNotes, searchNotes } = context;
+    const [selectedNote, setSelectedNote] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [editError, setEditError] = useState(null);
-    const ref = useRef(null)
-    const refClose = useRef(null)
     const ownerName = localStorage.getItem("name");
 
     // --- Search state (isolated from normal notes) ---
@@ -132,39 +131,39 @@ const Notes = () => {
         return () => clearTimeout(t);
     }, [searchQuery, searchNotes]);
 
-    const updateNote = (currentNote) => {
-        setEditError(null);
-        ref.current.click();
-        setNote({
-            id: currentNote?.id ?? currentNote?._id ?? "",
-            etitle: currentNote?.title ?? "",
-            econtent: currentNote?.content ?? "",
-            etag: currentNote?.tag ?? "",
-        })
-    }
+    const handleExpand = (note) => {
+        setSelectedNote(note);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+        setSelectedNote(null);
+    }, []);
+
+    const handleEditSuccess = useCallback((updatedNote) => {
+        if (isSearchMode && updatedNote) {
+            setSearchResults((prev) =>
+                prev.map((n) => {
+                    const id = n?.id ?? n?._id;
+                    const updatedId = updatedNote?.id ?? updatedNote?._id;
+                    return id === updatedId ? { ...n, ...updatedNote } : n;
+                })
+            );
+            setSelectedNote((prev) => (prev && (prev?.id ?? prev?._id) === (updatedNote?.id ?? updatedNote?._id) ? { ...prev, ...updatedNote } : prev));
+        }
+    }, [isSearchMode]);
 
     const handleDelete = useCallback(async (id) => {
         try {
             await deleteNote(id);
+            if (selectedNote && (selectedNote?.id ?? selectedNote?._id) === id) {
+                handleCloseModal();
+            }
         } catch (err) {
             console.error('Error deleting note:', err);
         }
-    }, [deleteNote]);
-
-    const handleClick = async (e) => {
-        setEditError(null);
-        try {
-            await editNote(note.id, note.etitle, note.econtent, note.etag);
-            refClose.current.click();
-        } catch (err) {
-            console.error('Error updating note:', err);
-            setEditError('Failed to update note. Please try again.');
-        }
-    }
-
-    const onChange = (e) => {
-        setNote({ ...note, [e.target.name]: e.target.value })
-    }
+    }, [deleteNote, selectedNote, handleCloseModal]);
 
     const formatDateTime = (value) => {
         if (!value) return null;
@@ -231,41 +230,12 @@ const Notes = () => {
     return (
         <>
             <AddNote />
-            <button ref={ref} type="button" className="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                Launch demo modal
-            </button>
-            <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="exampleModalLabel">Edit Note</h5>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div className="modal-body">
-                            {editError ? <div className="alert alert-danger mb-3">{editError}</div> : null}
-                            <form className="my-3">
-                                <div className="mb-3">
-                                    <label htmlFor="title" className="form-label">Title</label>
-                                    <input type="text" className="form-control" id="etitle" name="etitle" value={note.etitle} aria-describedby="emailHelp" onChange={onChange} minLength={5} required />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="content" className="form-label">Content</label>
-                                    <textarea type="text" className="form-control" id="econtent" name="econtent" value={note.econtent} onChange={onChange} minLength={5} required />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="tag" className="form-label">Tag</label>
-                                    <input type="text" className="form-control" id="etag" name="etag" value={note.etag} onChange={onChange} />
-                                </div>
-
-                            </form>
-                        </div>
-                        <div className="modal-footer">
-                            <button ref={refClose} type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button disabled={note.etitle.length < 5 || note.econtent.length < 5} onClick={handleClick} type="button" className="btn btn-primary">Update Note</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <NoteModal
+                note={selectedNote}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onEditSuccess={handleEditSuccess}
+            />
 
             <div className="row my-3">
                 <h2>Your Notes {ownerName && `(Owner: ${ownerName})`}</h2>
@@ -304,7 +274,7 @@ const Notes = () => {
                                     <Noteitem
                                         key={key}
                                         note={n}
-                                        updateNote={updateNote}
+                                        onExpand={handleExpand}
                                         onDelete={handleDelete}
                                         timestampText={getTimestampText(n)}
                                     />
@@ -327,7 +297,7 @@ const Notes = () => {
                                     <Noteitem
                                         key={key}
                                         note={n}
-                                        updateNote={updateNote}
+                                        onExpand={handleExpand}
                                         onDelete={handleDelete}
                                         timestampText={getTimestampText(n)}
                                     />

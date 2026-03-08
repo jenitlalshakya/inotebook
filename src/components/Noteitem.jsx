@@ -1,11 +1,13 @@
 const Noteitem = (props) => {
-    const { note, updateNote, onDelete, timestampText } = props;
+    const { note, onExpand, onDelete, timestampText } = props;
 
     const noteId = note?.id ?? note?._id;
     const title = note?.title ?? '';
-
     const content = note?.content ?? '';
     const tag = note?.tag ?? '';
+
+    const preview = content.length > 50 ? content.slice(0, 50) + '...' : content;
+
     return (
         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
             <div className="card my-3">
@@ -23,14 +25,14 @@ const Noteitem = (props) => {
                                 onClick={() => { if (noteId != null) onDelete(noteId) }}
                             ></i>
                             <i
-                                className="far fa-edit mx-2"
+                                className="fa-solid fa-up-right-and-down-left-from-center mx-2"
                                 role="button"
-                                aria-label="Edit note"
-                                onClick={() => { updateNote(note) }}
+                                aria-label="Expand note"
+                                onClick={() => onExpand(note)}
                             ></i>
                         </div>
                     </div>
-                    <p className="card-text mt-2 mb-0">{content}</p>
+                    <p className="card-text mt-2 mb-0">{preview}</p>
                     {timestampText ? <small className="text-muted d-block mt-2">{timestampText}</small> : null}
 
                 </div>
