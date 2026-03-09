@@ -10,7 +10,7 @@ const SEARCH_DEBOUNCE_MS = 400;
 
 const Notes = () => {
     const context = useContext(NoteContext);
-    const { notes, deleteNote, getNotes, searchNotes } = context;
+    const { notes, totalNotes, deleteNote, getNotes, searchNotes } = context;
     const [selectedNote, setSelectedNote] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [page, setPage] = useState(0);
@@ -238,12 +238,12 @@ const Notes = () => {
             />
 
             <div className="row my-3">
-                <h2>Your Notes {ownerName && `(Owner: ${ownerName})`}</h2>
+                <h2>Your Notes ({totalNotes} Notes) {ownerName ? `— Owner: ${ownerName}` : ""}</h2>
                 <div className="container mx-2 mb-2">
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="Search notes... (title:, content:, tag:, combine with comma, use or to search for multiple keywords in the different fields)"
+                        placeholder="Search notes... (title:, content:, tag:, combine with comma, use 'or' to search for multiple keywords in the different fields)"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         aria-label="Search notes"

@@ -5,6 +5,7 @@ const NoteState = (props) => {
     const host = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
     const [notes, setNotes] = useState([]);
+    const [totalNotes, setTotalNotes] = useState(0);
 
     // Get all Notes
     // append=false: replace notes (use for initial load when mounting). append=true: append (use for infinite scroll).
@@ -34,6 +35,10 @@ const NoteState = (props) => {
                 setNotes((prev) => [...prev, ...data.notes]);
             } else {
                 setNotes(data.notes);
+            }
+
+            if (data.count !== undefined) {
+                setTotalNotes(data.count);
             }
 
             return {
@@ -104,6 +109,7 @@ const NoteState = (props) => {
                     updated_at: nowIso,
                 };
                 setNotes((prev) => [newNote, ...prev]);
+                setTotalNotes((prev) => prev + 1);
             } else {
                 console.error("Unexpected create response:", data);
             }
@@ -127,6 +133,7 @@ const NoteState = (props) => {
             console.log("Deleted note:", data);
 
             setNotes((prev) => prev.filter((note) => note.id !== id)); // Use `id` from backend
+            setTotalNotes((prev) => prev - 1);
         } catch (error) {
             console.error("Error deleting note:", error);
         }
@@ -167,7 +174,7 @@ const NoteState = (props) => {
     };
 
     return (
-        <NoteContext.Provider value={{ notes, addNote, deleteNote, editNote, getNotes, searchNotes }}>
+        <NoteContext.Provider value={{ notes, totalNotes, addNote, deleteNote, editNote, getNotes, searchNotes }}>
             {props.children}
         </NoteContext.Provider>
     );
