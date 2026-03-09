@@ -9,7 +9,13 @@ const AddNote = () => {
 
     const handleClick = (e) => {
         e.preventDefault();
-        addNote(note.title, note.content, note.tag);
+        const normalizedTags = note.tag
+            .split(',')
+            .map(t => t.trim().toLowerCase())
+            .filter(Boolean)
+            .join(',');
+
+        addNote(note.title, note.content, normalizedTags);
         setNote({ title: "", content: "", tag: "" })
     }
 
@@ -38,7 +44,8 @@ const AddNote = () => {
                         className="add-note-tag-input"
                         id="tag"
                         name="tag"
-                        placeholder="optional"
+                        rows="1"
+                        placeholder="optional (use comma ',' to use multiple tags)"
                         value={note.tag}
                         onChange={onChange}
                     />
@@ -105,7 +112,7 @@ const AddNote = () => {
                     border-radius: 4px;
                     padding: 0.25rem 0.5rem;
                     flex: 1;
-                    max-width: 200px;
+                    max-width: 300px;
                 }
                 .add-note-tag-input::placeholder {
                     color: #6c757d;

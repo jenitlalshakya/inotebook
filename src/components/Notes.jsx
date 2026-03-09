@@ -136,6 +136,14 @@ const Notes = () => {
         setIsModalOpen(true);
     };
 
+    // Sync local note whenever the note in context changes
+    useEffect(() => {
+        if (selectedNote) {
+            const updated = notes.find(n => n.id === selectedNote.id);
+            if (updated) setSelectedNote(updated);
+        }
+    }, [notes, selectedNote]); // runs whenever selectedNote or notes array changes
+
     const handleCloseModal = useCallback(() => {
         setIsModalOpen(false);
         setSelectedNote(null);
@@ -265,7 +273,7 @@ const Notes = () => {
                         next={fetchSearchNotes}
                         hasMore={searchHasMore}
                         loader={searchLoading ? <h4 className="my-3">Loading...</h4> : null}
-                        endMessage={searchResults.length > 0 && !searchHasMore ? <p className="text-muted text-center my-3">End of search results. Total: {searchResults.length}</p> : null}
+                        endMessage={searchResults.length > 0 && !searchHasMore ? <p className="text-muted text-center my-3">End of search results. Total: {searchResults.length} out of {totalNotes}</p> : null}
                     >
                         <div className="d-flex flex-wrap">
                             {sortedSearchResults.map((n, idx) => {
@@ -288,7 +296,7 @@ const Notes = () => {
                         next={fetchNotes}
                         hasMore={hasMore}
                         loader={<h4 className="my-3">Loading...</h4>}
-                        endMessage={safeNotes.length > 0 && !hasMore ? <p className="text-muted text-center my-3">You have seen all notes. Total notes: {safeNotes.length}</p> : null}
+                            endMessage={safeNotes.length > 0 && !hasMore ? <p className="text-muted text-center my-3">You have seen all notes. Total notes: {safeNotes.length} out of {totalNotes}</p> : null}
                     >
                         <div className="d-flex flex-wrap">
                             {sortedNotes.map((n, idx) => {

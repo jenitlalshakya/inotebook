@@ -62,6 +62,8 @@ const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
     const content = note?.content ?? '';
     const tag = note?.tag ?? '';
 
+    const tagArray = (tag || '').split(',').map(t => t.trim()).filter(Boolean);
+
     return (
         <div
             className="modal-overlay"
@@ -91,13 +93,21 @@ const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
                                     name="etag"
                                     value={editNoteState.etag}
                                     onChange={handleEditChange}
-                                    placeholder="Tag (optional)"
+                                    placeholder="optional (use comma ',' to use multiple tags)"
                                 />
                             </>
                         ) : (
                             <>
                                 <h2 id="note-modal-title" className="modal-note-title">{title}</h2>
-                                {tag ? <span className="badge text-bg-secondary modal-note-tag">{tag}</span> : null}
+                                {tagArray.length > 0 && (
+                                    <div className="d-flex flex-wrap gap-1">
+                                        {tagArray.map((t, i) => (
+                                            <span key={i} className="badge text-bg-secondary modal-note-tag">
+                                                {t}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>
@@ -227,6 +237,7 @@ const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
                 .modal-note-tag {
                     display: inline-block;
                     margin-top: 0.25rem;
+                    margin-right: 4px;
                 }
                 .modal-note-actions {
                     display: flex;
