@@ -237,7 +237,6 @@ const Notes = () => {
 
     return (
         <>
-            <AddNote />
             <NoteModal
                 note={selectedNote}
                 isOpen={isModalOpen}
@@ -245,75 +244,124 @@ const Notes = () => {
                 onEditSuccess={handleEditSuccess}
             />
 
-            <div className="row my-3">
-                <h2>Your Notes ({totalNotes} Notes) {ownerName ? `— Owner: ${ownerName}` : ""}</h2>
-                <div className="container mx-2 mb-2">
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search notes... (title:, content:, tag:, combine with comma, use 'or' to search for multiple keywords in the different fields)"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        aria-label="Search notes"
-                    />
-                </div>
-                <div className="container mx-2">
-                    {!isSearchMode && isInitialLoad && loading && <p>Loading notes...</p>}
-                    {!isSearchMode && !loading && error && (
-                        <p className="text-danger">Unable to load notes. Please try again later.</p>
-                    )}
-                    {!isSearchMode && !loading && !error && safeNotes.length === 0 && !isInitialLoad && <p>No notes to display</p>}
-                    {isSearchMode && searchLoading && searchResults.length === 0 && <p>Searching...</p>}
-                    {isSearchMode && !searchLoading && searchResults.length === 0 && (searchQuery || "").trim() && <p>No notes found</p>}
-                </div>
+            <div className="dashboard-container">
+                {/* Sidebar Menu */}
+                <aside className="dashboard-sidebar">
+                    <h3 className="sidebar-section-title">Library</h3>
+                    <ul className="sidebar-menu">
+                        <li className="sidebar-item active">
+                            <i className="bi bi-journal-text"></i> All Notes
+                        </li>
+                        <li className="sidebar-item">
+                            <i className="bi bi-star"></i> Favorites
+                        </li>
+                        <li className="sidebar-item">
+                            <i className="bi bi-trash"></i> Trash
+                        </li>
+                    </ul>
 
-                {isSearchMode ? (
-                    <InfiniteScroll
-                        dataLength={searchResults.length}
-                        next={fetchSearchNotes}
-                        hasMore={searchHasMore}
-                        loader={searchLoading ? <h4 className="my-3">Loading...</h4> : null}
-                        endMessage={searchResults.length > 0 && !searchHasMore ? <p className="text-muted text-center my-3">End of search results. Total: {searchResults.length} out of {totalNotes}</p> : null}
-                    >
-                        <div className="d-flex flex-wrap">
-                            {sortedSearchResults.map((n, idx) => {
-                                const key = n?.id ?? n?._id ?? idx;
-                                return (
-                                    <Noteitem
-                                        key={key}
-                                        note={n}
-                                        onExpand={handleExpand}
-                                        onDelete={handleDelete}
-                                        timestampText={getTimestampText(n)}
-                                    />
-                                );
-                            })}
+                    <div className="sidebar-premium-card">
+                        <h4>Go Premium</h4>
+                        <p>Unlock cloud sync and unlimited notebooks.</p>
+                    </div>
+                </aside>
+
+                {/* Main Content Area */}
+                <main className="dashboard-main">
+                    {/* Top Search & Profile Bar */}
+                    <div className="dashboard-top">
+                        <div className="search-container">
+                            <i className="bi bi-search search-icon"></i>
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Search your notes..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                aria-label="Search notes"
+                            />
                         </div>
-                    </InfiniteScroll>
-                ) : (
-                    <InfiniteScroll
-                        dataLength={safeNotes.length}
-                        next={fetchNotes}
-                        hasMore={hasMore}
-                        loader={<h4 className="my-3">Loading...</h4>}
-                            endMessage={safeNotes.length > 0 && !hasMore ? <p className="text-muted text-center my-3">You have seen all notes. Total notes: {safeNotes.length} out of {totalNotes}</p> : null}
-                    >
-                        <div className="d-flex flex-wrap">
-                            {sortedNotes.map((n, idx) => {
-                                const key = n?.id ?? n?._id ?? idx;
-                                return (
-                                    <Noteitem
-                                        key={key}
-                                        note={n}
-                                        onExpand={handleExpand}
-                                        onDelete={handleDelete}
-                                        timestampText={getTimestampText(n)}
-                                    />
-                                );
-                            })}
+                        <div className="profile-container">
+                            <div className="profile-info">
+                                <div className="profile-name">{ownerName || "A"}</div>
+                                <div className="profile-status">Pro Member</div>
+                            </div>
+                            <div className="profile-avatar">
+                                <i className="bi bi-person-fill" style={{color: '#c2410c'}}></i>
+                            </div>
                         </div>
-                    </InfiniteScroll>
-                )}
+                    </div>
+
+                    {/* Inline Add Note Editor */}
+                    {!isSearchMode && <AddNote />}
+
+                    {/* Status Messages */}
+                    <div className="mb-3">
+                        {!isSearchMode && isInitialLoad && loading && <p className="text-muted">Loading notes...</p>}
+                        {!isSearchMode && !loading && error && (
+                            <p className="text-danger">Unable to load notes. Please try again later.</p>
+                        )}
+                        {!isSearchMode && !loading && !error && safeNotes.length === 0 && !isInitialLoad && <p className="text-muted">No notes to display. Start writing above!</p>}
+                        {isSearchMode && searchLoading && searchResults.length === 0 && <p className="text-muted">Searching...</p>}
+                        {isSearchMode && !searchLoading && searchResults.length === 0 && (searchQuery || "").trim() && <p className="text-muted">No notes found for "{searchQuery}"</p>}
+                    </div>
+
+                    {/* Notes Grid */}
+                    <h2 className="notes-section-title">
+                        {isSearchMode ? "Search Results" : "Recent Notes"} 
+                        <span className="notes-badge">{isSearchMode ? searchResults.length : totalNotes}</span>
+                    </h2>
+
+                    {isSearchMode ? (
+                        <InfiniteScroll
+                            dataLength={searchResults.length}
+                            next={fetchSearchNotes}
+                            hasMore={searchHasMore}
+                            loader={searchLoading ? <h4 className="my-3 text-muted">Loading...</h4> : null}
+                            endMessage={searchResults.length > 0 && !searchHasMore ? <p className="text-muted mt-4 text-center">End of search results.</p> : null}
+                            style={{ overflow: 'visible' }}
+                        >
+                            <div className="notes-grid">
+                                {sortedSearchResults.map((n, idx) => {
+                                    const key = n?.id ?? n?._id ?? idx;
+                                    return (
+                                        <Noteitem
+                                            key={key}
+                                            note={n}
+                                            onExpand={handleExpand}
+                                            onDelete={handleDelete}
+                                            timestampText={getTimestampText(n)}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </InfiniteScroll>
+                    ) : (
+                        <InfiniteScroll
+                            dataLength={safeNotes.length}
+                            next={fetchNotes}
+                            hasMore={hasMore}
+                            loader={<h4 className="my-3 text-muted">Loading...</h4>}
+                            endMessage={safeNotes.length > 0 && !hasMore ? <p className="text-muted mt-4 text-center">You have seen all notes.</p> : null}
+                            style={{ overflow: 'visible' }}
+                        >
+                            <div className="notes-grid">
+                                {sortedNotes.map((n, idx) => {
+                                    const key = n?.id ?? n?._id ?? idx;
+                                    return (
+                                        <Noteitem
+                                            key={key}
+                                            note={n}
+                                            onExpand={handleExpand}
+                                            onDelete={handleDelete}
+                                            timestampText={getTimestampText(n)}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </InfiniteScroll>
+                    )}
+                </main>
             </div>
         </>
     )
