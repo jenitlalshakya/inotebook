@@ -1,25 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Navbar from "./Navbar";
 import "./PublicHome.css";
 
 const PublicHome = () => {
     return (
         <div className="public-home-container">
-            {/* Header */}
-            <header className="ph-header">
-                <Link to="/" className="ph-logo">
-                    <span className="ph-logo-icon"><i className="bi bi-journal-text"></i></span>
-                    <span className="ph-logo-text">iNotebook</span>
-                </Link>
-                <nav className="ph-nav">
-                    <a href="#home" className="ph-nav-link">Home</a>
-                    <a href="#features" className="ph-nav-link">Features</a>
-                    <a href="#pricing" className="ph-nav-link">Pricing</a>
-                </nav>
-                <Link to="/login" className="ph-login-btn">
-                    <i className="bi bi-person-circle ph-login-icon"></i> Login
-                </Link>
-            </header>
+            {/* Unified Header */}
+            <Navbar />
 
             {/* Hero Section */}
             <section className="ph-hero" id="home">

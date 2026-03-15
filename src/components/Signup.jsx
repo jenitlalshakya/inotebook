@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 6;
@@ -117,11 +118,13 @@ const Signup = () => {
     };
 
     return (
-        <div className="container auth-page" style={{ maxWidth: "480px" }}>
-            <h2 className="mb-3 text-center">Create an account</h2>
-            <p className="text-muted text-center mb-4">
-                Sign up to start managing your notes securely.
-            </p>
+        <div className="auth-wrapper">
+            <Navbar />
+            <div className="container auth-page" style={{ maxWidth: "480px", marginTop: "100px" }}>
+                <h2 className="mb-3 text-center">Create an account</h2>
+                <p className="text-muted text-center mb-4">
+                    Sign up to start managing your notes securely.
+                </p>
 
             {apiError && (
                 <div className="alert alert-danger" role="alert">
@@ -249,6 +252,7 @@ const Signup = () => {
                     Log in
                 </Link>
             </p>
+            </div>
         </div>
     );
 };

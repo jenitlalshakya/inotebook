@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -91,11 +92,13 @@ const Login = () => {
     };
 
     return (
-        <div className="container auth-page" style={{ maxWidth: "420px" }}>
-            <h2 className="mb-3 text-center">Log in</h2>
-            <p className="text-muted text-center mb-4">
-                Enter your credentials to access your notes.
-            </p>
+        <div className="auth-wrapper">
+            <Navbar />
+            <div className="container auth-page" style={{ maxWidth: "420px", marginTop: "100px" }}>
+                <h2 className="mb-3 text-center">Log in</h2>
+                <p className="text-muted text-center mb-4">
+                    Enter your credentials to access your notes.
+                </p>
 
             {apiError && (
                 <div className="alert alert-danger" role="alert">
@@ -173,6 +176,7 @@ const Login = () => {
                     Sign up
                 </Link>
             </p>
+            </div>
         </div>
     );
 };

@@ -1,60 +1,63 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import "./Navbar.css";
 
 const Navbar = (props) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+    const isAuthenticated = !!token;
 
     const handleLogout = () => {
         localStorage.removeItem("token");
         navigate("/");
+        window.location.reload();
     };
 
-    const token = localStorage.getItem("token");
-
-    if (location.pathname === '/' && !token) {
-        return null;
-    }
-
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-            <div className="container-fluid">
-                <Link className="navbar-brand" to="/">{props.title}</Link>
-                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
+        <header className="custom-navbar">
+            <Link to="/" className="nav-logo">
+                <span className="nav-logo-icon">
+                    <i className="bi bi-journal-text"></i>
+                </span>
+                <span className="nav-logo-text">{props.title || "iNotebook"}</span>
+            </Link>
 
-                <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li className="nav-item">
-                            <Link className={`nav-link ${location.pathname === "/" ? "active" : ""}`} to="/">Home</Link>
-                        </li>
+            <nav className="nav-links">
+                {isAuthenticated ? (
+                    <>
+                        {/* Authenticated Links */}
+                        <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>Notes</Link>
+                        <Link to="/profile" className={`nav-link ${location.pathname === "/profile" ? "active" : ""}`}>Profile</Link>
+                        {/* You can add more app-specific links here if needed */}
+                    </>
+                ) : (
+                    <>
+                        {/* Public Links */}
+                        <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>Home</Link>
+                        <Link to="/about" className={`nav-link ${location.pathname === "/about" ? "active" : ""}`}>About</Link>
+                        <Link to="#features" className="nav-link">Features</Link>
+                    </>
+                )}
+            </nav>
 
-                        <li className="nav-item">
-                            <Link className={`nav-link ${location.pathname === "/about" ? "active" : ""}`} to="/about">About</Link>
-                        </li>
-                        {token && (
-                            <li className="nav-item">
-                                <Link className={`nav-link ${location.pathname === "/profile" ? "active" : ""}`} to="/profile">Profile</Link>
-                            </li>
-                        )}
-                    </ul>
-
-                    <form className="d-flex">
-                        {!token ? (
-                            <>
-                                <Link className="btn btn-primary mx-1" to="/login">Login</Link>
-                                <Link className="btn btn-primary mx-1" to="/signup">Signup</Link>
-                            </>
-                        ) : (
-                            <>
-                                <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
-                            </>
-                        )}
-                    </form>
-                </div>
+            <div className="nav-actions">
+                {isAuthenticated ? (
+                    <button onClick={handleLogout} className="nav-btn-danger">
+                        Logout
+                    </button>
+                ) : (
+                    <>
+                        <Link to="/login" className="nav-btn-light">
+                            <i className="bi bi-person-circle"></i> Login
+                        </Link>
+                        <Link to="/signup" className="nav-btn-danger" style={{backgroundColor: '#0d4a46'}}>
+                            Sign Up
+                        </Link>
+                    </>
+                )}
             </div>
-        </nav>
+        </header>
     );
 };
 

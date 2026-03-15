@@ -2,16 +2,11 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Notes from "./Notes";
 import PublicHome from "./PublicHome";
+import Navbar from "./Navbar";
 import "./HomeDashboard.css";
 
 const Home = () => {
     const token = localStorage.getItem("token");
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/");
-    };
 
     if (!token) {
         return <PublicHome />;
@@ -19,21 +14,8 @@ const Home = () => {
 
     return (
         <div className="home-dashboard">
-            {/* Authenticated Dashboard Header */}
-            <header className="home-header">
-                <Link to="/" className="home-logo">
-                    <span className="home-logo-icon"><i className="bi bi-journal-text"></i></span>
-                    <span className="home-logo-text">iNotebook</span>
-                </Link>
-                <nav className="home-nav-links">
-                    <Link to="/">Home</Link>
-                    <Link to="/about">Features</Link>
-                    <Link to="/about">Pricing</Link>
-                </nav>
-                <button onClick={handleLogout} className="home-action-btn">
-                    Logout
-                </button>
-            </header>
+            {/* Unified Header */}
+            <Navbar />
 
             {/* Authenticated Dashboard Hero */}
             <section className="home-hero">

@@ -15,7 +15,6 @@ function App() {
             <NoteState>
                 <Router>
                     <div className="app-layout">
-                        <Navbar title="iNotebook" />
                         <main className="app-main">
                             <div className="container">
                                 <Routes>

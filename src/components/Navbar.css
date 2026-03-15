@@ -1,0 +1,100 @@
+/* Navbar.css */
+
+.custom-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 5%;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #1a1a1a;
+    text-decoration: none;
+}
+  
+.nav-logo-icon {
+    background-color: #0d4a46;
+    color: white;
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
+    font-size: 1.2rem;
+}
+
+.nav-logo-text {
+    color: #115740;
+}
+  
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+  
+.nav-link {
+    color: #555;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+  
+.nav-link:hover, .nav-link.active {
+    color: #0d4a46;
+}
+  
+.nav-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Public Login Button */
+.nav-btn-light {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #eaf1f1;
+    color: #0d4a46;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+  
+.nav-btn-light:hover {
+    background-color: #dcedec;
+    color: #0d4a46;
+}
+
+/* Authenticated/Action Button */
+.nav-btn-danger {
+    background-color: #ef4444;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.nav-btn-danger:hover {
+    background-color: #dc2626;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+      display: none;
+    }
+}
