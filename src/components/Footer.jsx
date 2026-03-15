@@ -1,7 +1,14 @@
 import React from 'react'
+import { useLocation } from 'react-router-dom'
 
 const Footer = () => {
-    const currentYear = new Date().getFullYear()
+    const currentYear = new Date().getFullYear();
+    const location = useLocation();
+    const token = localStorage.getItem("token");
+
+    if (location.pathname === '/' && !token) {
+        return null; // PublicHome renders its own footer
+    }
 
     return (
         <footer className="site-footer">

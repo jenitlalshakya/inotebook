@@ -1,37 +1,134 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import "./PublicHome.css";
 
 const PublicHome = () => {
-    const features = [
-        "Create and organize your notes securely",
-        "Edit and delete notes anytime",
-        "Access your notes from anywhere",
-        "Simple, fast, and easy to use",
-    ];
-
     return (
-        <div className="public-home auth-page">
-            <div className="public-home__card">
-                <h1 className="public-home__title">Welcome to iNotebook!</h1>
-                <p className="public-home__subtitle">
-                    Your personal space to capture ideas, organize thoughts, and keep everything in one place.
+        <div className="public-home-container">
+            {/* Header */}
+            <header className="ph-header">
+                <Link to="/" className="ph-logo">
+                    <span className="ph-logo-icon"><i className="bi bi-journal-text"></i></span>
+                    <span className="ph-logo-text">iNotebook</span>
+                </Link>
+                <nav className="ph-nav">
+                    <a href="#home" className="ph-nav-link">Home</a>
+                    <a href="#features" className="ph-nav-link">Features</a>
+                    <a href="#pricing" className="ph-nav-link">Pricing</a>
+                </nav>
+                <Link to="/login" className="ph-login-btn">
+                    <i className="bi bi-person-circle ph-login-icon"></i> Login
+                </Link>
+            </header>
+
+            {/* Hero Section */}
+            <section className="ph-hero" id="home">
+                <h1 className="ph-hero-title">
+                    Capture Your <br />
+                    <span className="ph-highlight">Thoughts</span>, Anywhere
+                </h1>
+                <p className="ph-hero-subtitle">
+                    Your digital space to organize ideas, tasks, and daily inspirations in one beautifully simple place.
                 </p>
+                <Link to="/signup" className="ph-cta-btn">
+                    Get Started for Free
+                </Link>
+                <div className="ph-no-credit">
+                    <i className="bi bi-check-circle-fill ph-check-icon"></i> No credit card required
+                </div>
+            </section>
 
-                <ul className="public-home__features">
-                    {features.map((feature, idx) => (
-                        <li key={idx}>{feature}</li>
-                    ))}
-                </ul>
-
-                <div className="public-home__actions">
-                    <Link to="/login" className="btn btn-primary btn-lg">
-                        Login
-                    </Link>
-                    <Link to="/signup" className="btn btn-outline-primary btn-lg">
-                        Sign Up
-                    </Link>
+            {/* Mockup Section */}
+            <div className="ph-mockup-container">
+                <div className="ph-mockup-window">
+                    <div className="ph-mockup-header">
+                        <div className="ph-dots">
+                            <div className="ph-dot"></div>
+                            <div className="ph-dot"></div>
+                            <div className="ph-dot"></div>
+                        </div>
+                        <div className="ph-search-bar">
+                             <div style={{fontSize: '10px', color: '#aaa', textAlign: 'center', lineHeight: '24px'}}>inotebook.app/dashboard</div>
+                        </div>
+                    </div>
+                    <div className="ph-mockup-body">
+                        <div className="ph-sidebar">
+                            <div className="ph-nav-item active"></div>
+                            <div className="ph-nav-item"></div>
+                            <div className="ph-nav-item short"></div>
+                            <br />
+                            <div className="ph-nav-item"></div>
+                            <div className="ph-nav-item short"></div>
+                        </div>
+                        <div className="ph-content">
+                            <div className="ph-board-column">
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <span className="ph-board-tag personal">Personal</span>
+                                    <i className="bi bi-three-dots text-muted"></i>
+                                </div>
+                                <div className="ph-task-item">
+                                    <div className="ph-task-line"></div>
+                                    <div className="ph-task-line short"></div>
+                                </div>
+                                <div className="ph-task-item">
+                                    <div className="ph-task-line"></div>
+                                    <div className="ph-task-line"></div>
+                                </div>
+                            </div>
+                            <div className="ph-board-column">
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <span className="ph-board-tag work">Work</span>
+                                    <i className="bi bi-three-dots text-muted"></i>
+                                </div>
+                                <div className="ph-task-item">
+                                    <div className="ph-task-line"></div>
+                                    <div className="ph-task-line short"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {/* Organize Section */}
+            <section className="ph-organize-section" id="features">
+                <h2 className="ph-organize-title">Organize Your Life</h2>
+                <p className="ph-organize-subtitle">
+                    Stay on top of your tasks with our intuitive interface designed for maximum productivity and minimal distraction.
+                </p>
+                
+                <div className="ph-cards-container">
+                    <div className="ph-card">
+                        <div className="ph-card-img-placeholder ph-card-img-work"></div>
+                        <h3 className="ph-card-title">Work</h3>
+                        <p className="ph-card-desc">
+                            Keep your professional projects organized with tags, shared notebooks, and real-time collaboration tools.
+                        </p>
+                    </div>
+                    <div className="ph-card">
+                        <div className="ph-card-img-placeholder ph-card-img-personal"></div>
+                        <h3 className="ph-card-title">Personal</h3>
+                        <p className="ph-card-desc">
+                            Manage your daily inspirations, journal entries, and personal to-do lists in a private, secure environment.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="ph-footer">
+                <div className="ph-footer-links">
+                    <a href="#!" className="ph-footer-link">Privacy</a>
+                    <a href="#!" className="ph-footer-link">Terms</a>
+                    <a href="#!" className="ph-footer-link">Help</a>
+                </div>
+                <div className="ph-footer-logo">
+                    <i className="bi bi-journal-text" style={{color: '#aaa', marginRight: '4px'}}></i> iNotebook
+                </div>
+                <div className="ph-footer-copy">
+                    © {new Date().getFullYear()} iNotebook. All rights reserved. Designed for thinkers and makers everywhere.
+                </div>
+            </footer>
         </div>
     );
 };

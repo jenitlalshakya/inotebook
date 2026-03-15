@@ -12,6 +12,10 @@ const Navbar = (props) => {
 
     const token = localStorage.getItem("token");
 
+    if (location.pathname === '/' && !token) {
+        return null;
+    }
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
             <div className="container-fluid">
