@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import "./Auth.css";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 6;
@@ -118,140 +119,142 @@ const Signup = () => {
     };
 
     return (
-        <div className="auth-wrapper">
+        <div className="auth-container">
             <Navbar />
-            <div className="container auth-page" style={{ maxWidth: "480px", marginTop: "100px" }}>
-                <h2 className="mb-3 text-center">Create an account</h2>
-                <p className="text-muted text-center mb-4">
-                    Sign up to start managing your notes securely.
-                </p>
-
-            {apiError && (
-                <div className="alert alert-danger" role="alert">
-                    {apiError}
-                </div>
-            )}
-            {apiSuccess && (
-                <div className="alert alert-success" role="alert">
-                    {apiSuccess}
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit} noValidate>
-                <div className="mb-3">
-                    <label htmlFor="name" className="form-label">
-                        Full Name
-                    </label>
-                    <input
-                        type="text"
-                        className={`form-control ${errors.name ? "is-invalid" : ""}`}
-                        id="name"
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        autoComplete="name"
-                    />
-                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
-                </div>
-
-                <div className="mb-3">
-                    <label htmlFor="email" className="form-label">
-                        Email address
-                    </label>
-                    <input
-                        type="email"
-                        className={`form-control ${errors.email ? "is-invalid" : ""}`}
-                        id="email"
-                        name="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        autoComplete="email"
-                    />
-                    {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-                </div>
-
-                <div className="mb-3">
-                    <label htmlFor="password" className="form-label">
-                        Password
-                    </label>
-                    <div className="input-group">
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            className={`form-control ${errors.password ? "is-invalid" : ""}`}
-                            id="password"
-                            name="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            autoComplete="new-password"
-                        />
-                        <span
-                            className="input-group-text"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => setShowPassword((prev) => !prev)}
-                        >
-                            <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
-                        </span>
+            <div className="auth-content">
+                <div className="auth-card">
+                    <div className="auth-header">
+                        <div className="auth-logo">
+                            <i className="bi bi-journal-text"></i>
+                        </div>
+                        <h2 className="auth-title">Create your account</h2>
+                        <p className="auth-subtitle">Start organizing your ideas today</p>
                     </div>
-                    {errors.password && (
-                        <div className="invalid-feedback d-block">{errors.password}</div>
-                    )}
-                </div>
 
-                <div className="mb-3">
-                    <label htmlFor="confirmPassword" className="form-label">
-                        Confirm Password
-                    </label>
-                    <div className="input-group">
-                        <input
-                            type={showConfirmPassword ? "text" : "password"}
-                            className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            value={form.confirmPassword}
-                            onChange={handleChange}
-                            autoComplete="new-password"
-                        />
-                        <span
-                            className="input-group-text"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => setShowConfirmPassword((prev) => !prev)}
-                        >
-                            <i className={`bi ${showConfirmPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
-                        </span>
-                    </div>
-                    {errors.confirmPassword && (
-                        <div className="invalid-feedback d-block">
-                            {errors.confirmPassword}
+                    {apiError && (
+                        <div className="auth-alert auth-alert-danger" role="alert">
+                            <i className="bi bi-exclamation-circle-fill"></i>
+                            <div>{apiError}</div>
                         </div>
                     )}
-                </div>
-
-                <button
-                    type="submit"
-                    className="btn btn-primary w-100"
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <>
-                            <span
-                                className="spinner-border spinner-border-sm me-2"
-                                role="status"
-                                aria-hidden="true"
-                            ></span>
-                            Creating account...
-                        </>
-                    ) : (
-                        "Sign up"
+                    {apiSuccess && (
+                        <div className="auth-alert auth-alert-success" role="alert">
+                            <i className="bi bi-check-circle-fill"></i>
+                            <div>{apiSuccess}</div>
+                        </div>
                     )}
-                </button>
-            </form>
 
-            <p className="mt-3 text-center">
-                Already have an account?{" "}
-                <Link to="/login">
-                    Log in
-                </Link>
-            </p>
+                    <form className="auth-form" onSubmit={handleSubmit} noValidate>
+                        <div className="form-group">
+                            <label htmlFor="name" className="auth-label">
+                                Full Name
+                            </label>
+                            <input
+                                type="text"
+                                className={`auth-input ${errors.name ? "is-invalid" : ""}`}
+                                id="name"
+                                name="name"
+                                placeholder="John Doe"
+                                value={form.name}
+                                onChange={handleChange}
+                                autoComplete="name"
+                            />
+                            {errors.name && <span className="auth-error-text">{errors.name}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="email" className="auth-label">
+                                Email Address
+                            </label>
+                            <input
+                                type="email"
+                                className={`auth-input ${errors.email ? "is-invalid" : ""}`}
+                                id="email"
+                                name="email"
+                                placeholder="name@example.com"
+                                value={form.email}
+                                onChange={handleChange}
+                                autoComplete="email"
+                            />
+                            {errors.email && <span className="auth-error-text">{errors.email}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="password" className="auth-label">
+                                Password
+                            </label>
+                            <div className="auth-password-group">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className={`auth-input ${errors.password ? "is-invalid" : ""}`}
+                                    id="password"
+                                    name="password"
+                                    placeholder="Create a password"
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    autoComplete="new-password"
+                                />
+                                <button
+                                    type="button"
+                                    className="auth-password-toggle"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                                </button>
+                            </div>
+                            {errors.password && <span className="auth-error-text">{errors.password}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="confirmPassword" className="auth-label">
+                                Confirm Password
+                            </label>
+                            <div className="auth-password-group">
+                                <input
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    className={`auth-input ${errors.confirmPassword ? "is-invalid" : ""}`}
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    placeholder="Confirm your password"
+                                    value={form.confirmPassword}
+                                    onChange={handleChange}
+                                    autoComplete="new-password"
+                                />
+                                <button
+                                    type="button"
+                                    className="auth-password-toggle"
+                                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                >
+                                    <i className={`bi ${showConfirmPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                                </button>
+                            </div>
+                            {errors.confirmPassword && (
+                                <span className="auth-error-text">{errors.confirmPassword}</span>
+                            )}
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="auth-button"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    Creating account...
+                                </>
+                            ) : (
+                                "Create Account"
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="auth-footer">
+                        Already have an account? <Link to="/login" className="auth-link">Log in</Link>
+                    </div>
+                </div>
             </div>
         </div>
     );

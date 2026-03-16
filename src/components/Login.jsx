@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import "./Auth.css";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -92,90 +93,90 @@ const Login = () => {
     };
 
     return (
-        <div className="auth-wrapper">
+        <div className="auth-container">
             <Navbar />
-            <div className="container auth-page" style={{ maxWidth: "420px", marginTop: "100px" }}>
-                <h2 className="mb-3 text-center">Log in</h2>
-                <p className="text-muted text-center mb-4">
-                    Enter your credentials to access your notes.
-                </p>
-
-            {apiError && (
-                <div className="alert alert-danger" role="alert">
-                    {apiError}
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit} noValidate>
-                <div className="mb-3">
-                    <label htmlFor="email" className="form-label">
-                        Email address
-                    </label>
-                    <input
-                        type="email"
-                        className={`form-control ${errors.email ? "is-invalid" : ""}`}
-                        id="email"
-                        name="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        autoComplete="email"
-                    />
-                    {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-                </div>
-
-                <div className="mb-3">
-                    <label htmlFor="password" className="form-label">
-                        Password
-                    </label>
-                    <div className="input-group">
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            className={`form-control ${errors.password ? "is-invalid" : ""}`}
-                            id="password"
-                            name="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            autoComplete="current-password"
-                        />
-                        <span
-                            className="input-group-text"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => setShowPassword((prev) => !prev)}
-                        >
-                            <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
-                        </span>
+            <div className="auth-content">
+                <div className="auth-card">
+                    <div className="auth-header">
+                        <div className="auth-logo">
+                            <i className="bi bi-journal-text"></i>
+                        </div>
+                        <h2 className="auth-title">Welcome Back</h2>
+                        <p className="auth-subtitle">Sign in to continue to iNotebook</p>
                     </div>
-                    {errors.password && (
-                        <div className="invalid-feedback d-block">{errors.password}</div>
+
+                    {apiError && (
+                        <div className="auth-alert auth-alert-danger" role="alert">
+                            <i className="bi bi-exclamation-circle-fill"></i>
+                            <div>{apiError}</div>
+                        </div>
                     )}
+
+                    <form className="auth-form" onSubmit={handleSubmit} noValidate>
+                        <div className="form-group">
+                            <label htmlFor="email" className="auth-label">
+                                Email Address
+                            </label>
+                            <input
+                                type="email"
+                                className={`auth-input ${errors.email ? "is-invalid" : ""}`}
+                                id="email"
+                                name="email"
+                                placeholder="name@example.com"
+                                value={form.email}
+                                onChange={handleChange}
+                                autoComplete="email"
+                            />
+                            {errors.email && <span className="auth-error-text">{errors.email}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="password" className="auth-label">
+                                Password
+                            </label>
+                            <div className="auth-password-group">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className={`auth-input ${errors.password ? "is-invalid" : ""}`}
+                                    id="password"
+                                    name="password"
+                                    placeholder="Enter your password"
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    autoComplete="current-password"
+                                />
+                                <button
+                                    type="button"
+                                    className="auth-password-toggle"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                                </button>
+                            </div>
+                            {errors.password && <span className="auth-error-text">{errors.password}</span>}
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="auth-button"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    Signing in...
+                                </>
+                            ) : (
+                                "Login"
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="auth-footer">
+                        Don't have an account? <Link to="/signup" className="auth-link">Sign up</Link>
+                    </div>
                 </div>
-
-                <button
-                    type="submit"
-                    className="btn btn-primary w-100"
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <>
-                            <span
-                                className="spinner-border spinner-border-sm me-2"
-                                role="status"
-                                aria-hidden="true"
-                            ></span>
-                            Logging in...
-                        </>
-                    ) : (
-                        "Log in"
-                    )}
-                </button>
-            </form>
-
-            <p className="mt-3 text-center">
-                Don't have an account?{" "}
-                <Link to="/signup">
-                    Sign up
-                </Link>
-            </p>
             </div>
         </div>
     );

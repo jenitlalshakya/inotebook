@@ -4,6 +4,7 @@ import NoteContext from "../context/notes/NoteContext"
 import Noteitem from './Noteitem';
 import AddNote from './Addnote';
 import NoteModal from './NoteModal';
+import { Link } from 'react-router-dom';
 
 const LIMIT = 20;
 const SEARCH_DEBOUNCE_MS = 400;
@@ -21,10 +22,6 @@ const Notes = () => {
 
     // --- Search state (isolated from normal notes) ---
     const [searchQuery, setSearchQuery] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchSkip, setSearchSkip] = useState(0);
-    const [searchHasMore, setSearchHasMore] = useState(false);
-    const [searchLoading, setSearchLoading] = useState(false);
     const isSearchMode = (searchQuery || "").trim() !== "";
 
     // Normal mode: existing fetch (unchanged)
@@ -49,25 +46,7 @@ const Notes = () => {
         [getNotes, page, loading]
     );
 
-    // Search mode: fetch more search results (only when searchSkip > 0; first page is done by debounce)
-    const fetchSearchNotes = useCallback(async () => {
-        if (!isSearchMode || searchLoading) return;
-        const q = (searchQuery || "").trim();
-        if (!q) return;
-        if (searchSkip === 0) return;
-        setSearchLoading(true);
-        try {
-            const { notes: nextNotes, hasMore: more } = await searchNotes(q, LIMIT, searchSkip);
-            setSearchResults((prev) => [...prev, ...nextNotes]);
-            setSearchSkip((s) => s + LIMIT);
-            setSearchHasMore(Boolean(more));
-        } catch (err) {
-            console.error("Error fetching search notes:", err);
-            setSearchHasMore(false);
-        } finally {
-            setSearchLoading(false);
-        }
-    }, [isSearchMode, searchQuery, searchSkip, searchLoading, searchNotes]);
+
 
     useEffect(() => {
         let mounted = true;
@@ -99,37 +78,7 @@ const Notes = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on mount
     }, []);
 
-    // When search query changes while in search mode: reset so debounce can refetch first page
-    useEffect(() => {
-        if (isSearchMode) {
-            setSearchResults([]);
-            setSearchSkip(0);
-            setSearchHasMore(false);
-            setSearchLoading(true);
-        }
-    }, [searchQuery]);
 
-    // Debounced first-page search: 400ms after user stops typing, call search API
-    useEffect(() => {
-        const q = (searchQuery || "").trim();
-        if (!q) return;
-        const t = setTimeout(async () => {
-            setSearchLoading(true);
-            try {
-                const { notes: firstNotes, hasMore: more } = await searchNotes(q, LIMIT, 0);
-                setSearchResults(firstNotes || []);
-                setSearchSkip(LIMIT);
-                setSearchHasMore(Boolean(more));
-            } catch (err) {
-                console.error("Error searching notes:", err);
-                setSearchResults([]);
-                setSearchHasMore(false);
-            } finally {
-                setSearchLoading(false);
-            }
-        }, SEARCH_DEBOUNCE_MS);
-        return () => clearTimeout(t);
-    }, [searchQuery, searchNotes]);
 
     const handleExpand = (note) => {
         setSelectedNote(note);
@@ -150,17 +99,10 @@ const Notes = () => {
     }, []);
 
     const handleEditSuccess = useCallback((updatedNote) => {
-        if (isSearchMode && updatedNote) {
-            setSearchResults((prev) =>
-                prev.map((n) => {
-                    const id = n?.id ?? n?._id;
-                    const updatedId = updatedNote?.id ?? updatedNote?._id;
-                    return id === updatedId ? { ...n, ...updatedNote } : n;
-                })
-            );
+        if (updatedNote) {
             setSelectedNote((prev) => (prev && (prev?.id ?? prev?._id) === (updatedNote?.id ?? updatedNote?._id) ? { ...prev, ...updatedNote } : prev));
         }
-    }, [isSearchMode]);
+    }, []);
 
     const handleDelete = useCallback(async (id) => {
         try {
@@ -222,6 +164,38 @@ const Notes = () => {
         return [...safeNotes].sort((a, b) => getTime(b) - getTime(a));
     }, [safeNotes]);
 
+    const filteredNotes = useMemo(() => {
+        if (!isSearchMode) return [];
+        
+        const query = searchQuery.trim().toLowerCase();
+        
+        // Split by comma for AND conditions
+        const conditions = query.split(',').map(c => c.trim()).filter(Boolean);
+        
+        return safeNotes.filter(note => {
+            // For each AND condition, the note must match
+            return conditions.every(condition => {
+                // Split by ' or ' for OR conditions
+                const orParts = condition.split(/\s+or\s+/).map(p => p.trim()).filter(Boolean);
+                
+                return orParts.some(part => {
+                    const match = part.match(/^(title|tag|content):\s*(.*)$/);
+                    if (match) {
+                        const [, field, value] = match;
+                        const noteValue = (note[field] || "").toLowerCase();
+                        return noteValue.includes(value);
+                    } else {
+                        // Normal text search across all fields
+                        const t = (note.title || "").toLowerCase();
+                        const c = (note.content || "").toLowerCase();
+                        const tag = (note.tag || "").toLowerCase();
+                        return t.includes(part) || c.includes(part) || tag.includes(part);
+                    }
+                });
+            });
+        });
+    }, [isSearchMode, searchQuery, safeNotes]);
+
     const sortedSearchResults = useMemo(() => {
         const getTime = (n) => {
             const tUpdated = getMs(n?.updated_at);
@@ -230,8 +204,8 @@ const Notes = () => {
             if (Number.isFinite(tCreated)) return tCreated;
             return 0;
         };
-        return [...searchResults].sort((a, b) => getTime(b) - getTime(a));
-    }, [searchResults]);
+        return [...filteredNotes].sort((a, b) => getTime(b) - getTime(a));
+    }, [filteredNotes]);
 
     const isInitialLoad = page === 0 && safeNotes.length === 0;
 
@@ -287,7 +261,7 @@ const Notes = () => {
                                 <div className="profile-status">Pro Member</div>
                             </div>
                             <div className="profile-avatar">
-                                <i className="bi bi-person-fill" style={{color: '#c2410c'}}></i>
+                                <Link to="/profile"><i className="bi bi-person-fill" style={{ color: '#c2410c' }}></i></Link>
                             </div>
                         </div>
                     </div>
@@ -302,40 +276,30 @@ const Notes = () => {
                             <p className="text-danger">Unable to load notes. Please try again later.</p>
                         )}
                         {!isSearchMode && !loading && !error && safeNotes.length === 0 && !isInitialLoad && <p className="text-muted">No notes to display. Start writing above!</p>}
-                        {isSearchMode && searchLoading && searchResults.length === 0 && <p className="text-muted">Searching...</p>}
-                        {isSearchMode && !searchLoading && searchResults.length === 0 && (searchQuery || "").trim() && <p className="text-muted">No notes found for "{searchQuery}"</p>}
+                        {isSearchMode && sortedSearchResults.length === 0 && (searchQuery || "").trim() && <p className="text-muted">No notes found for "{searchQuery}"</p>}
                     </div>
 
                     {/* Notes Grid */}
                     <h2 className="notes-section-title">
                         {isSearchMode ? "Search Results" : "Recent Notes"} 
-                        <span className="notes-badge">{isSearchMode ? searchResults.length : totalNotes}</span>
+                        <span className="notes-badge">{isSearchMode ? sortedSearchResults.length : totalNotes}</span>
                     </h2>
 
                     {isSearchMode ? (
-                        <InfiniteScroll
-                            dataLength={searchResults.length}
-                            next={fetchSearchNotes}
-                            hasMore={searchHasMore}
-                            loader={searchLoading ? <h4 className="my-3 text-muted">Loading...</h4> : null}
-                            endMessage={searchResults.length > 0 && !searchHasMore ? <p className="text-muted mt-4 text-center">End of search results.</p> : null}
-                            style={{ overflow: 'visible' }}
-                        >
-                            <div className="notes-grid">
-                                {sortedSearchResults.map((n, idx) => {
-                                    const key = n?.id ?? n?._id ?? idx;
-                                    return (
-                                        <Noteitem
-                                            key={key}
-                                            note={n}
-                                            onExpand={handleExpand}
-                                            onDelete={handleDelete}
-                                            timestampText={getTimestampText(n)}
-                                        />
-                                    );
-                                })}
-                            </div>
-                        </InfiniteScroll>
+                        <div className="notes-grid">
+                            {sortedSearchResults.map((n, idx) => {
+                                const key = n?.id ?? n?._id ?? idx;
+                                return (
+                                    <Noteitem
+                                        key={key}
+                                        note={n}
+                                        onExpand={handleExpand}
+                                        onDelete={handleDelete}
+                                        timestampText={getTimestampText(n)}
+                                    />
+                                );
+                            })}
+                        </div>
                     ) : (
                         <InfiniteScroll
                             dataLength={safeNotes.length}

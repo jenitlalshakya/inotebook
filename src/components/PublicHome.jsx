@@ -111,7 +111,7 @@ const PublicHome = () => {
                     <a href="#!" className="ph-footer-link">Help</a>
                 </div>
                 <div className="ph-footer-logo">
-                    <i className="bi bi-journal-text" style={{color: '#aaa', marginRight: '4px'}}></i> iNotebook
+                    <Link to="/" className="ph-footer-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><i className="bi bi-journal-text" style={{color: '#aaa', marginRight: '4px'}}></i> iNotebook</Link>
                 </div>
                 <div className="ph-footer-copy">
                     © {new Date().getFullYear()} iNotebook. All rights reserved. Designed for thinkers and makers everywhere.
