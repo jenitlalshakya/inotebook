@@ -33,7 +33,7 @@ const Noteitem = (props) => {
                         onExpand(note);
                     }}
                 >
-                    <i className="bi bi-pencil-square"></i>
+                    <i className="bi bi-arrows-fullscreen"></i>
                 </button>
             </div>
 

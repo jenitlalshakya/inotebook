@@ -23,6 +23,10 @@ const Notes = () => {
     // --- Search state (isolated from normal notes) ---
     const [searchQuery, setSearchQuery] = useState("");
     const isSearchMode = (searchQuery || "").trim() !== "";
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchPage, setSearchPage] = useState(0);
+    const [searchHasMore, setSearchHasMore] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
 
     // Normal mode: existing fetch (unchanged)
     const fetchNotes = useCallback(
@@ -49,6 +53,13 @@ const Notes = () => {
 
 
     useEffect(() => {
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+        }
+
+        setPage(0);
+        setHasMore(true);
+
         let mounted = true;
         const controller = new AbortController();
 
@@ -61,6 +72,9 @@ const Notes = () => {
                 if (mounted) {
                     setHasMore(Boolean(more));
                     setPage(1);
+                    requestAnimationFrame(() => {
+                        window.scrollTo({ top: 0, behavior: 'auto' });
+                    });
                 }
             } catch (err) {
                 if (err?.name === "AbortError") return;
@@ -78,7 +92,45 @@ const Notes = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on mount
     }, []);
 
+    useEffect(() => {
+        if (!isSearchMode) {
+            setSearchResults([]);
+            setSearchPage(0);
+            setSearchHasMore(false);
+            return;
+        }
 
+        const timeoutId = setTimeout(async () => {
+            setIsSearching(true);
+            try {
+                const { notes: resNotes, hasMore: more } = await searchNotes(searchQuery, LIMIT, 0);
+                setSearchResults(resNotes);
+                setSearchHasMore(Boolean(more));
+                setSearchPage(1);
+            } catch (err) {
+                console.error("Search error:", err);
+            } finally {
+                setIsSearching(false);
+            }
+        }, SEARCH_DEBOUNCE_MS);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery, isSearchMode, searchNotes]);
+
+    const fetchSearchNotes = useCallback(async () => {
+        if (isSearching || !searchHasMore) return;
+        setIsSearching(true);
+        try {
+            const { notes: resNotes, hasMore: more } = await searchNotes(searchQuery, LIMIT, searchPage * LIMIT);
+            setSearchResults(prev => [...prev, ...resNotes]);
+            setSearchHasMore(Boolean(more));
+            setSearchPage(p => p + 1);
+        } catch (err) {
+            console.error("Search fetch error:", err);
+        } finally {
+            setIsSearching(false);
+        }
+    }, [searchQuery, searchPage, searchHasMore, isSearching, searchNotes]);
 
     const handleExpand = (note) => {
         setSelectedNote(note);
@@ -101,6 +153,7 @@ const Notes = () => {
     const handleEditSuccess = useCallback((updatedNote) => {
         if (updatedNote) {
             setSelectedNote((prev) => (prev && (prev?.id ?? prev?._id) === (updatedNote?.id ?? updatedNote?._id) ? { ...prev, ...updatedNote } : prev));
+            setSearchResults((prev) => prev.map((n) => (n?.id ?? n?._id) === (updatedNote?.id ?? updatedNote?._id) ? { ...n, ...updatedNote } : n));
         }
     }, []);
 
@@ -110,6 +163,7 @@ const Notes = () => {
             if (selectedNote && (selectedNote?.id ?? selectedNote?._id) === id) {
                 handleCloseModal();
             }
+            setSearchResults((prev) => prev.filter((n) => (n?.id ?? n?._id) !== id));
         } catch (err) {
             console.error('Error deleting note:', err);
         }
@@ -164,38 +218,6 @@ const Notes = () => {
         return [...safeNotes].sort((a, b) => getTime(b) - getTime(a));
     }, [safeNotes]);
 
-    const filteredNotes = useMemo(() => {
-        if (!isSearchMode) return [];
-        
-        const query = searchQuery.trim().toLowerCase();
-        
-        // Split by comma for AND conditions
-        const conditions = query.split(',').map(c => c.trim()).filter(Boolean);
-        
-        return safeNotes.filter(note => {
-            // For each AND condition, the note must match
-            return conditions.every(condition => {
-                // Split by ' or ' for OR conditions
-                const orParts = condition.split(/\s+or\s+/).map(p => p.trim()).filter(Boolean);
-                
-                return orParts.some(part => {
-                    const match = part.match(/^(title|tag|content):\s*(.*)$/);
-                    if (match) {
-                        const [, field, value] = match;
-                        const noteValue = (note[field] || "").toLowerCase();
-                        return noteValue.includes(value);
-                    } else {
-                        // Normal text search across all fields
-                        const t = (note.title || "").toLowerCase();
-                        const c = (note.content || "").toLowerCase();
-                        const tag = (note.tag || "").toLowerCase();
-                        return t.includes(part) || c.includes(part) || tag.includes(part);
-                    }
-                });
-            });
-        });
-    }, [isSearchMode, searchQuery, safeNotes]);
-
     const sortedSearchResults = useMemo(() => {
         const getTime = (n) => {
             const tUpdated = getMs(n?.updated_at);
@@ -204,8 +226,9 @@ const Notes = () => {
             if (Number.isFinite(tCreated)) return tCreated;
             return 0;
         };
-        return [...filteredNotes].sort((a, b) => getTime(b) - getTime(a));
-    }, [filteredNotes]);
+        const safeSearch = Array.isArray(searchResults) ? searchResults : [];
+        return [...safeSearch].sort((a, b) => getTime(b) - getTime(a));
+    }, [searchResults]);
 
     const isInitialLoad = page === 0 && safeNotes.length === 0;
 
@@ -251,7 +274,7 @@ const Notes = () => {
                             <input
                                 type="text"
                                 className="search-input"
-                                placeholder="Search your notes..."
+                                placeholder="Search: title, content, tag, e.g. title:todo, tag:work"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 aria-label="Search notes"
@@ -278,7 +301,8 @@ const Notes = () => {
                             <p className="text-danger">Unable to load notes. Please try again later.</p>
                         )}
                         {!isSearchMode && !loading && !error && safeNotes.length === 0 && !isInitialLoad && <p className="text-muted">No notes to display. Start writing above!</p>}
-                        {isSearchMode && sortedSearchResults.length === 0 && (searchQuery || "").trim() && <p className="text-muted">No notes found for "{searchQuery}"</p>}
+                        {isSearchMode && isSearching && searchPage === 0 && <p className="text-muted">Searching...</p>}
+                        {isSearchMode && !isSearching && sortedSearchResults.length === 0 && (searchQuery || "").trim() && <p className="text-muted">No notes found for "{searchQuery}"</p>}
                     </div>
 
                     {/* Notes Grid */}
@@ -288,20 +312,29 @@ const Notes = () => {
                     </h2>
 
                     {isSearchMode ? (
-                        <div className="notes-grid">
-                            {sortedSearchResults.map((n, idx) => {
-                                const key = n?.id ?? n?._id ?? idx;
-                                return (
-                                    <Noteitem
-                                        key={key}
-                                        note={n}
-                                        onExpand={handleExpand}
-                                        onDelete={handleDelete}
-                                        timestampText={getTimestampText(n)}
-                                    />
-                                );
-                            })}
-                        </div>
+                        <InfiniteScroll
+                            dataLength={sortedSearchResults.length}
+                            next={fetchSearchNotes}
+                            hasMore={searchHasMore}
+                            loader={<h4 className="my-3 text-muted">Loading...</h4>}
+                            endMessage={sortedSearchResults.length > 0 && !searchHasMore ? <p className="text-muted mt-4 text-center">You have seen all search results.</p> : null}
+                            style={{ overflow: 'visible' }}
+                        >
+                            <div className="notes-grid">
+                                {sortedSearchResults.map((n, idx) => {
+                                    const key = n?.id ?? n?._id ?? idx;
+                                    return (
+                                        <Noteitem
+                                            key={key}
+                                            note={n}
+                                            onExpand={handleExpand}
+                                            onDelete={handleDelete}
+                                            timestampText={getTimestampText(n)}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </InfiniteScroll>
                     ) : (
                         <InfiniteScroll
                             dataLength={safeNotes.length}
