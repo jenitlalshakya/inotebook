@@ -421,14 +421,12 @@
 .dash-note-actions {
   display: flex;
   gap: 0.5rem;
-  opacity: 0;
+  opacity: 1;
+  pointer-events: auto;
   transition: opacity 0.2s;
   position: absolute;
   top: 1.25rem;
   right: 1.25rem;
-}
-.dash-note-card:hover .dash-note-actions {
-  opacity: 1;
 }
 .dash-note-btn {
   background: #ffffff;

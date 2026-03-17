@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
 import "./Auth.css";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -94,8 +93,7 @@ const Login = () => {
 
     return (
         <div className="auth-container">
-            <Navbar />
-            <div className="auth-content">
+                        <div className="auth-content">
                 <div className="auth-card">
                     <div className="auth-header">
                         <div className="auth-logo">

@@ -2,7 +2,6 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Notes from "./Notes";
 import PublicHome from "./PublicHome";
-import Navbar from "./Navbar";
 import "./HomeDashboard.css";
 
 const Home = () => {
@@ -14,9 +13,6 @@ const Home = () => {
 
     return (
         <div className="home-dashboard">
-            {/* Unified Header */}
-            <Navbar />
-
             {/* Authenticated Dashboard Hero */}
             <section className="home-hero">
                 <h1>Your Thoughts, <span className="highlight-red">Organized.</span></h1>

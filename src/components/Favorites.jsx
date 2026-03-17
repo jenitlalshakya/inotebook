@@ -87,10 +87,39 @@ const Favorites = () => {
         showToast('Removed from favorites');
     }, [favorites, removeFavorite]);
 
+    const formatDateTime = (value) => {
+        if (!value) return null;
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return null;
+        return d.toLocaleString();
+    };
+
     const getMs = (value) => {
         if (!value) return NaN;
         const t = Date.parse(value);
         return Number.isFinite(t) ? t : NaN;
+    };
+
+    const getTimestampText = (n) => {
+        const createdMs = getMs(n?.created_at);
+        const updatedMs = getMs(n?.updated_at);
+
+        const createdLabel = formatDateTime(n?.created_at);
+        const updatedLabel = formatDateTime(n?.updated_at);
+
+        if (createdLabel && updatedLabel && Number.isFinite(createdMs) && Number.isFinite(updatedMs)) {
+            if (createdMs === updatedMs) return `Created: ${createdLabel}`;
+            return `Created: ${createdLabel} | Updated: ${updatedLabel}`;
+        }
+
+        if (createdLabel && updatedLabel) {
+            if (n?.created_at === n?.updated_at) return `Created: ${createdLabel}`;
+            return `Created: ${createdLabel} | Updated: ${updatedLabel}`;
+        }
+
+        if (createdLabel) return `Created: ${createdLabel}`;
+        if (updatedLabel) return `Updated: ${updatedLabel}`;
+        return '';
     };
 
     const safeFavorites = Array.isArray(favorites) ? favorites : [];
@@ -177,7 +206,7 @@ const Favorites = () => {
                                 note={n}
                                 onExpand={() => {}}
                                 onDelete={() => {}}
-                                timestampText={''}
+                                timestampText={getTimestampText(n)}
                                 mode="favorites"
                                 onRemoveFavorite={handleRemoveFavorite}
                             />

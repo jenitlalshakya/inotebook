@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 const MIN_PASSWORD_LENGTH = 6;
@@ -213,25 +212,26 @@ const Profile = () => {
 
     if (loading) {
         return (
-            <div className="profile-page auth-page">
-                <Navbar />
-                <div className="profile-card">
-                    <div className="text-center py-5">
-                        <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Loading...</span>
+            <div className="dashboard-container">
+                <main className="dashboard-main">
+                    <div className="profile-card">
+                        <div className="text-center py-5">
+                            <div className="spinner-border text-primary" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                            <p className="mt-2 text-muted">Loading profile...</p>
                         </div>
-                        <p className="mt-2 text-muted">Loading profile...</p>
                     </div>
-                </div>
+                </main>
             </div>
         );
     }
 
     return (
-        <div className="profile-page auth-page">
-            <Navbar />
-            <div className="profile-card">
-                <h2 className="profile-card__title">Profile Information</h2>
+        <div className="dashboard-container">
+            <main className="dashboard-main">
+                <div className="profile-card">
+                    <h2 className="profile-card__title">Profile Information</h2>
 
                 {error && (
                     <div className="alert alert-danger" role="alert">
@@ -433,9 +433,10 @@ const Profile = () => {
                 )}
 
                 {!user && !error && !loading && (
-                    <p className="text-muted">No profile data available.</p>
-                )}
-            </div>
+                        <p className="text-muted">No profile data available.</p>
+                    )}
+                </div>
+            </main>
         </div>
     );
 };

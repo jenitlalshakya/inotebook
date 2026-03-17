@@ -1,14 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Navbar from "./Navbar";
 import "./PublicHome.css";
 
 const PublicHome = () => {
     return (
         <div className="public-home-container">
-            {/* Unified Header */}
-            <Navbar />
-
             {/* Hero Section */}
             <section className="ph-hero" id="home">
                 <h1 className="ph-hero-title">

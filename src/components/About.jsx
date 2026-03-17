@@ -1,5 +1,4 @@
 import React from "react";
-import Navbar from "./Navbar";
 
 const About = () => {
     const features = [
@@ -18,7 +17,6 @@ const About = () => {
 
     return (
         <div className="about-page auth-page">
-            <Navbar />
             <div className="about-page__card">
                 <h1 className="about-page__title">About iNotebook</h1>
 
