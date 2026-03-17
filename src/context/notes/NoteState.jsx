@@ -189,7 +189,7 @@ const NoteState = (props) => {
     // Restore Note
     const restoreNote = async (id) => {
         try {
-            const response = await fetch(`${host}/api/notes/${id}/restore/`, {
+            const response = await fetch(`${host}/api/notes/restore/${id}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
