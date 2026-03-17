@@ -6,6 +6,7 @@ const NoteState = (props) => {
 
     const [notes, setNotes] = useState([]);
     const [totalNotes, setTotalNotes] = useState(0);
+    const [trashNotes, setTrashNotes] = useState([]);
 
     // Get all Notes
     // append=false: replace notes (use for initial load when mounting). append=true: append (use for infinite scroll).
@@ -118,7 +119,7 @@ const NoteState = (props) => {
         }
     };
 
-    // Delete a Note
+    // Delete a Note (Move to trash)
     const deleteNote = async (id) => {
         try {
             const response = await fetch(`${host}/api/notes/delete/${id}/`, {
@@ -136,6 +137,75 @@ const NoteState = (props) => {
             setTotalNotes((prev) => prev - 1);
         } catch (error) {
             console.error("Error deleting note:", error);
+        }
+    };
+
+    // Get Trash Notes
+    const getTrashNotes = async () => {
+        try {
+            const response = await fetch(`${host}/api/notes/get-trash/`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data?.success) {
+                setTrashNotes(data.notes || []);
+            } else {
+                console.error("Error fetching trash notes:", data?.error);
+            }
+        } catch (error) {
+            console.error("Error fetching trash notes:", error);
+        }
+    };
+
+    // Delete Permanent (single note)
+    const deletePermanentNote = async (id) => {
+        try {
+            const response = await fetch(`${host}/api/notes/delete-permanent/${id}/`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data?.success) {
+                setTrashNotes((prev) => prev.filter((note) => note.id !== id));
+            } else {
+                console.error("Error deleting note permanently:", data?.error);
+            }
+        } catch (error) {
+            console.error("Error deleting note permanently:", error);
+        }
+    };
+
+    // Empty Trash
+    const emptyTrash = async () => {
+        try {
+            const response = await fetch(`${host}/api/notes/empty-trash/`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data?.success) {
+                setTrashNotes([]);
+            } else {
+                console.error("Error emptying trash:", data?.error);
+            }
+        } catch (error) {
+            console.error("Error emptying trash:", error);
         }
     };
 
@@ -174,7 +244,7 @@ const NoteState = (props) => {
     };
 
     return (
-        <NoteContext.Provider value={{ notes, totalNotes, addNote, deleteNote, editNote, getNotes, searchNotes }}>
+        <NoteContext.Provider value={{ notes, totalNotes, trashNotes, addNote, deleteNote, editNote, getNotes, searchNotes, getTrashNotes, deletePermanentNote, emptyTrash }}>
             {props.children}
         </NoteContext.Provider>
     );

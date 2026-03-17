@@ -229,9 +229,11 @@ const Notes = () => {
                         <li className="sidebar-item">
                             <i className="bi bi-star"></i> Favorites
                         </li>
-                        <li className="sidebar-item">
-                            <i className="bi bi-trash"></i> Trash
-                        </li>
+                        <Link to="/trash" style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <li className="sidebar-item">
+                                <i className="bi bi-trash"></i> Trash
+                            </li>
+                        </Link>
                     </ul>
 
                     <div className="sidebar-premium-card">

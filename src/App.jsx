@@ -8,6 +8,7 @@ import Profile from './components/Profile';
 import NoteState from './context/notes/NoteState';
 import Signup from './components/Signup';
 import Login from './components/Login';
+import Trash from './components/Trash';
 
 function App() {
     return (
@@ -23,6 +24,7 @@ function App() {
                                     <Route exact path="/profile" element={<Profile />} />
                                     <Route exact path="/login" element={<Login />} />
                                     <Route exact path="/signup" element={<Signup />} />
+                                    <Route exact path="/trash" element={<Trash />} />
                                 </Routes>
                             </div>
                         </main>
