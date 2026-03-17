@@ -5,9 +5,10 @@ import { Link } from 'react-router-dom';
 
 const Trash = () => {
     const context = useContext(NoteContext);
-    const { trashNotes, getTrashNotes, deletePermanentNote, emptyTrash } = context;
+    const { trashNotes, getTrashNotes, deletePermanentNote, emptyTrash, restoreNote } = context;
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [toastMessage, setToastMessage] = useState(null);
     const ownerName = localStorage.getItem("name");
 
     useEffect(() => {
@@ -33,15 +34,27 @@ const Trash = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const showToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(null), 3000);
+    };
+
     const handleDeleteForever = useCallback(async (id) => {
         if (window.confirm("Are you sure you want to permanently delete this note?")) {
             await deletePermanentNote(id);
+            showToast("Note permanently deleted");
         }
     }, [deletePermanentNote]);
+
+    const handleRestore = useCallback(async (id) => {
+        await restoreNote(id);
+        showToast("Note restored");
+    }, [restoreNote]);
 
     const handleEmptyTrash = useCallback(async () => {
         if (window.confirm("Are you sure you want to empty the trash? This action cannot be undone.")) {
             await emptyTrash();
+            showToast("Trash emptied");
         }
     }, [emptyTrash]);
 
@@ -157,6 +170,7 @@ const Trash = () => {
                             <TrashNoteItem
                                 key={key}
                                 note={n}
+                                onRestore={handleRestore}
                                 onDeleteForever={handleDeleteForever}
                                 timestampText={getTimestampText(n)}
                             />
@@ -164,6 +178,35 @@ const Trash = () => {
                     })}
                 </div>
             </main>
+
+            {/* Toast Notification */}
+            {toastMessage && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    background: '#111827',
+                    color: '#ffffff',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    zIndex: 1050,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    fontWeight: 500,
+                    fontSize: '0.95rem',
+                    animation: 'fadeInOut 3s forwards'
+                }}>
+                    {toastMessage}
+                </div>
+            )}
+
+            <style>{`
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translateY(20px); }
+                    10% { opacity: 1; transform: translateY(0); }
+                    90% { opacity: 1; transform: translateY(0); }
+                    100% { opacity: 0; transform: translateY(20px); pointer-events: none; }
+                }
+            `}</style>
         </div>
     );
 };

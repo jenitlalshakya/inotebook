@@ -11,7 +11,18 @@ const Noteitem = (props) => {
     const tagArray = (tag || '').split(',').map(t => t.trim()).filter(Boolean);
 
     return (
-        <div className="dash-note-card">
+        <div className="dash-note-card" onClick={() => onExpand(note)}>
+            {tagArray.length > 0 && (
+                <div className="dash-note-tags-container">
+                    {tagArray.slice(0, 2).map((t, i) => (
+                        <span key={i} className={`dash-note-tag ${t.toLowerCase()}`}>{t}</span>
+                    ))}
+                    {tagArray.length > 2 && (
+                        <span className="dash-note-tag">...</span>
+                    )}
+                </div>
+            )}
+
             <div className="dash-note-actions">
                 <button
                     className="dash-note-btn text-danger"
@@ -24,29 +35,7 @@ const Noteitem = (props) => {
                 >
                     <i className="bi bi-trash"></i>
                 </button>
-                <button
-                    className="dash-note-btn"
-                    title="Edit/Expand note"
-                    aria-label="Expand note"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onExpand(note);
-                    }}
-                >
-                    <i className="bi bi-arrows-fullscreen"></i>
-                </button>
             </div>
-
-            {tagArray.length > 0 && (
-                <div className="d-flex flex-wrap gap-1 mb-2">
-                    {tagArray.slice(0, 2).map((t, i) => (
-                        <span key={i} className={`dash-note-tag ${t.toLowerCase()}`}>{t}</span>
-                    ))}
-                    {tagArray.length > 2 && (
-                        <span className="dash-note-tag bg-light text-dark">...</span>
-                    )}
-                </div>
-            )}
 
             <h5 className="dash-note-title" title={title}>{title}</h5>
             

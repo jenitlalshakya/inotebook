@@ -1,7 +1,7 @@
 import React from 'react';
 
 const TrashNoteItem = (props) => {
-    const { note, onDeleteForever, timestampText } = props;
+    const { note, onRestore, onDeleteForever, timestampText } = props;
 
     const noteId = note?.id ?? note?._id;
     const title = note?.title ?? '';
@@ -11,8 +11,30 @@ const TrashNoteItem = (props) => {
     const tagArray = (tag || '').split(',').map(t => t.trim()).filter(Boolean);
 
     return (
-        <div className="dash-note-card">
-            <div className="dash-note-actions">
+        <div className="dash-note-card" style={{ cursor: 'default' }}>
+            {tagArray.length > 0 && (
+                <div className="dash-note-tags-container">
+                    {tagArray.slice(0, 2).map((t, i) => (
+                        <span key={i} className={`dash-note-tag ${t.toLowerCase()}`}>{t}</span>
+                    ))}
+                    {tagArray.length > 2 && (
+                        <span className="dash-note-tag">...</span>
+                    )}
+                </div>
+            )}
+
+            <div className="dash-note-actions" style={{ opacity: 1, display: 'flex', gap: '0.5rem' }}>
+                <button
+                    className="btn btn-outline-secondary btn-sm"
+                    title="Restore note"
+                    aria-label="Restore note"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (noteId != null) onRestore(noteId);
+                    }}
+                >
+                    <i className="bi bi-arrow-counterclockwise me-1"></i> Restore
+                </button>
                 <button
                     className="btn btn-danger btn-sm"
                     title="Delete Forever"
@@ -25,17 +47,6 @@ const TrashNoteItem = (props) => {
                     <i className="bi bi-trash-fill me-1"></i> Delete Forever
                 </button>
             </div>
-
-            {tagArray.length > 0 && (
-                <div className="d-flex flex-wrap gap-1 mb-2">
-                    {tagArray.slice(0, 2).map((t, i) => (
-                        <span key={i} className={`dash-note-tag ${t.toLowerCase()}`}>{t}</span>
-                    ))}
-                    {tagArray.length > 2 && (
-                        <span className="dash-note-tag bg-light text-dark">...</span>
-                    )}
-                </div>
-            )}
 
             <h5 className="dash-note-title" title={title}>{title}</h5>
             

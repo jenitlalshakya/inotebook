@@ -79,54 +79,55 @@ const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
                             <>
                                 <input
                                     type="text"
+                                    className="modal-note-tag-input"
+                                    name="etag"
+                                    value={editNoteState.etag}
+                                    onChange={handleEditChange}
+                                    placeholder="Add tags... (use comma ',' for multiple tags)"
+                                    style={{ marginBottom: '0.5rem' }}
+                                />
+                                <input
+                                    type="text"
                                     className="modal-note-title-input"
                                     name="etitle"
                                     value={editNoteState.etitle}
                                     onChange={handleEditChange}
                                     minLength={3}
                                     required
-                                    placeholder="Title"
-                                />
-                                <input
-                                    type="text"
-                                    className="modal-note-tag-input"
-                                    name="etag"
-                                    value={editNoteState.etag}
-                                    onChange={handleEditChange}
-                                    placeholder="optional (use comma ',' to use multiple tags)"
+                                    placeholder="Note Title"
                                 />
                             </>
                         ) : (
                             <>
-                                <h2 id="note-modal-title" className="modal-note-title">{title}</h2>
                                 {tagArray.length > 0 && (
-                                    <div className="d-flex flex-wrap gap-1">
+                                    <div className="modal-note-tags-container">
                                         {tagArray.map((t, i) => (
-                                            <span key={i} className="badge text-bg-secondary modal-note-tag">
+                                            <span key={i} className={`dash-note-tag ${t.toLowerCase()}`}>
                                                 {t}
                                             </span>
                                         ))}
                                     </div>
                                 )}
+                                <h2 id="note-modal-title" className="modal-note-title">{title}</h2>
                             </>
                         )}
                     </div>
                     <div className="modal-note-actions">
                         {!isEditMode ? (
                             <i
-                                className="far fa-edit modal-note-icon"
+                                className="bi bi-pencil-square modal-note-icon"
                                 role="button"
                                 aria-label="Edit note"
                                 onClick={handleOpenEdit}
                             ></i>
                         ) : (
                             <>
-                                <button type="button" className="btn btn-sm btn-outline-secondary me-2" onClick={handleCloseEdit}>
+                                <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCloseEdit}>
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-sm btn-dark"
                                     onClick={handleSaveEdit}
                                     disabled={editNoteState.etitle.length < 3 || editNoteState.econtent.length < 5}
                                 >
@@ -135,7 +136,7 @@ const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
                             </>
                         )}
                         <i
-                            className="fa-solid fa-xmark modal-note-icon"
+                            className="bi bi-x-lg modal-note-icon"
                             role="button"
                             aria-label="Close modal"
                             onClick={onClose}
@@ -160,128 +161,6 @@ const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
                     )}
                 </div>
             </div>
-
-            <style>{`
-                .modal-overlay {
-                    position: fixed;
-                    inset: 0;
-                    background: rgba(0, 0, 0, 0.5);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 1050;
-                    padding: 1rem;
-                }
-                .modal-note {
-                    background: #ffffff;
-                    color: #000000;
-                    border-radius: 8px;
-                    max-width: 650px;
-                    width: 100%;
-                    max-height: 90vh;
-                    display: flex;
-                    flex-direction: column;
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-                    color-scheme: light;
-                }
-                .modal-note-header {
-                    position: sticky;
-                    top: 0;
-                    background: #ffffff;
-                    color: #000000;
-                    z-index: 10;
-                    padding: 1rem 1.25rem;
-                    border-bottom: 1px solid #dee2e6;
-                    display: flex;
-                    align-items: flex-start;
-                    justify-content: space-between;
-                    gap: 1rem;
-                }
-                .modal-note-header-content {
-                    flex: 1;
-                    min-width: 0;
-                }
-                .modal-note-title {
-                    color: #000000;
-                    font-size: 1.4rem;
-                    font-weight: 600;
-                    margin: 0 0 0.5rem 0;
-                }
-                .modal-note-title-input {
-                    background: #ffffff;
-                    color: #000000;
-                    font-size: 1.4rem;
-                    font-weight: 600;
-                    border: none;
-                    outline: none;
-                    width: 100%;
-                    padding: 0;
-                    margin-bottom: 0.5rem;
-                }
-                .modal-note-title-input::placeholder {
-                    color: #6c757d;
-                }
-                .modal-note-tag-input {
-                    background: #ffffff;
-                    color: #000000;
-                    font-size: 0.875rem;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    padding: 0.25rem 0.5rem;
-                    width: auto;
-                    max-width: 200px;
-                }
-                .modal-note-tag-input::placeholder {
-                    color: #6c757d;
-                }
-                .modal-note-tag {
-                    display: inline-block;
-                    margin-top: 0.25rem;
-                    margin-right: 4px;
-                }
-                .modal-note-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    flex-shrink: 0;
-                }
-                .modal-note-icon {
-                    cursor: pointer;
-                    font-size: 1.25rem;
-                    padding: 0.25rem;
-                    color: #111111;
-                }
-                .modal-note-icon:hover {
-                    opacity: 0.7;
-                }
-                .modal-note-body {
-                    padding: 1rem 1.25rem;
-                    overflow-y: auto;
-                    flex: 1;
-                    background: #ffffff;
-                    color: #000000;
-                }
-                .modal-note-content {
-                    color: #000000;
-                    white-space: pre-wrap;
-                    word-break: break-word;
-                }
-                .modal-note-content-input {
-                    background: #ffffff;
-                    color: #000000;
-                    width: 100%;
-                    min-height: 200px;
-                    border: none;
-                    resize: none;
-                    outline: none;
-                    font-size: 1rem;
-                    line-height: 1.5;
-                    font-family: inherit;
-                }
-                .modal-note-content-input::placeholder {
-                    color: #6c757d;
-                }
-            `}</style>
         </div>
     );
 };

@@ -186,6 +186,33 @@ const NoteState = (props) => {
         }
     };
 
+    // Restore Note
+    const restoreNote = async (id) => {
+        try {
+            const response = await fetch(`${host}/api/notes/${id}/restore/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data?.success) {
+                setTrashNotes((prev) => prev.filter((note) => note.id !== id));
+                if (data.note) {
+                    setNotes((prev) => [data.note, ...prev]);
+                    setTotalNotes((prev) => prev + 1);
+                }
+            } else {
+                console.error("Error restoring note:", data?.error);
+            }
+        } catch (error) {
+            console.error("Error restoring note:", error);
+        }
+    };
+
     // Empty Trash
     const emptyTrash = async () => {
         try {
@@ -244,7 +271,7 @@ const NoteState = (props) => {
     };
 
     return (
-        <NoteContext.Provider value={{ notes, totalNotes, trashNotes, addNote, deleteNote, editNote, getNotes, searchNotes, getTrashNotes, deletePermanentNote, emptyTrash }}>
+        <NoteContext.Provider value={{ notes, totalNotes, trashNotes, addNote, deleteNote, editNote, getNotes, searchNotes, getTrashNotes, deletePermanentNote, emptyTrash, restoreNote }}>
             {props.children}
         </NoteContext.Provider>
     );
