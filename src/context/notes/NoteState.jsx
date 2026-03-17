@@ -7,6 +7,7 @@ const NoteState = (props) => {
     const [notes, setNotes] = useState([]);
     const [totalNotes, setTotalNotes] = useState(0);
     const [trashNotes, setTrashNotes] = useState([]);
+    const [favoriteNotes, setFavoriteNotes] = useState([]);
 
     // Get all Notes
     // append=false: replace notes (use for initial load when mounting). append=true: append (use for infinite scroll).
@@ -236,6 +237,82 @@ const NoteState = (props) => {
         }
     };
 
+    // Toggle Favorite (optimistic + shared state)
+    const toggleFavorite = async (id, currentIsFavorite) => {
+        const endpoint = currentIsFavorite ? "unfavorite" : "favorite";
+
+        // snapshots for revert
+        const prevNotesSnapshot = notes;
+        const prevFavoritesSnapshot = favoriteNotes;
+
+        // optimistic update: notes
+        setNotes((prev) =>
+            prev.map((n) =>
+                (n?.id ?? n?._id) === id ? { ...n, is_favorite: !currentIsFavorite } : n
+            )
+        );
+
+        // optimistic update: favoriteNotes
+        setFavoriteNotes((prev) => {
+            if (!currentIsFavorite) {
+                const exists = prev.some((n) => (n?.id ?? n?._id) === id);
+                if (exists) return prev;
+                const noteToAdd = prevNotesSnapshot.find((n) => (n?.id ?? n?._id) === id) || null;
+                return noteToAdd ? [{ ...noteToAdd, is_favorite: true }, ...prev] : [{ id, is_favorite: true }, ...prev];
+            }
+            return prev.filter((n) => (n?.id ?? n?._id) !== id);
+        });
+
+        try {
+            const response = await fetch(`${host}/api/notes/${endpoint}/${id}/`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            const data = await response.json();
+            if (!response.ok || !data?.success) {
+                throw new Error(data?.error || "Failed to update favorite status");
+            }
+            return { success: true };
+        } catch (error) {
+            console.error("Error toggling favorite:", error);
+            // revert
+            setNotes(prevNotesSnapshot);
+            setFavoriteNotes(prevFavoritesSnapshot);
+            return { success: false, error: error.message };
+        }
+    };
+
+    const removeFavorite = async (id) => {
+        return await toggleFavorite(id, true);
+    };
+
+    // Get Favorite Notes
+    const getFavoriteNotes = async () => {
+        try {
+            const response = await fetch(`${host}/api/notes/favorites/`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            const data = await response.json();
+            if (response.ok && data?.success && Array.isArray(data?.notes)) {
+                setFavoriteNotes(data.notes);
+                return { notes: data.notes };
+            }
+            setFavoriteNotes([]);
+            return { notes: [] };
+        } catch (error) {
+            console.error("Error fetching favorite notes:", error);
+            setFavoriteNotes([]);
+            return { notes: [] };
+        }
+    };
+
     // Edit a Note
     const editNote = async (id, title, content, tag) => {
         try {
@@ -271,7 +348,7 @@ const NoteState = (props) => {
     };
 
     return (
-        <NoteContext.Provider value={{ notes, totalNotes, trashNotes, addNote, deleteNote, editNote, getNotes, searchNotes, getTrashNotes, deletePermanentNote, emptyTrash, restoreNote }}>
+        <NoteContext.Provider value={{ notes, totalNotes, trashNotes, favoriteNotes, addNote, deleteNote, editNote, getNotes, searchNotes, getTrashNotes, deletePermanentNote, emptyTrash, restoreNote, toggleFavorite, removeFavorite, getFavoriteNotes }}>
             {props.children}
         </NoteContext.Provider>
     );

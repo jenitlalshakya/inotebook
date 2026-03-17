@@ -9,6 +9,7 @@ import NoteState from './context/notes/NoteState';
 import Signup from './components/Signup';
 import Login from './components/Login';
 import Trash from './components/Trash';
+import Favorites from './components/Favorites';
 import SwipeUpIcon from './components/SwipeUpIcon';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
                                     <Route exact path="/login" element={<Login />} />
                                     <Route exact path="/signup" element={<Signup />} />
                                     <Route exact path="/trash" element={<Trash />} />
+                                    <Route exact path="/favorites" element={<Favorites />} />
                                 </Routes>
                                 <SwipeUpIcon />
                             </div>

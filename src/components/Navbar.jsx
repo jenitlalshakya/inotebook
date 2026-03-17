@@ -28,6 +28,7 @@ const Navbar = (props) => {
                     <>
                         {/* Authenticated Links */}
                         <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>Notes</Link>
+                        <Link to="/favorites" className={`nav-link ${location.pathname === "/favorites" ? "active" : ""}`}>Favorites</Link>
                         <Link to="/trash" className={`nav-link ${location.pathname === "/trash" ? "active" : ""}`}>Trash</Link>
                         <Link to="/profile" className={`nav-link ${location.pathname === "/profile" ? "active" : ""}`}>Profile</Link>
                         {/* You can add more app-specific links here if needed */}

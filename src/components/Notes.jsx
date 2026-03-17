@@ -215,7 +215,9 @@ const Notes = () => {
             return 0;
         };
 
-        return [...safeNotes].sort((a, b) => getTime(b) - getTime(a));
+        // Hide favorites from All Notes list (Favorites has its own section)
+        const nonFavorite = [...safeNotes].filter((n) => !n?.is_favorite);
+        return nonFavorite.sort((a, b) => getTime(b) - getTime(a));
     }, [safeNotes]);
 
     const sortedSearchResults = useMemo(() => {
@@ -249,9 +251,11 @@ const Notes = () => {
                         <li className="sidebar-item active">
                             <i className="bi bi-journal-text"></i> All Notes
                         </li>
-                        <li className="sidebar-item">
-                            <i className="bi bi-star"></i> Favorites
-                        </li>
+                        <Link to="/favorites" style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <li className={`sidebar-item ${window.location.pathname === '/favorites' ? 'active' : ''}`}>
+                                <i className="bi bi-star"></i> Favorites
+                            </li>
+                        </Link>
                         <Link to="/trash" style={{ textDecoration: 'none', color: 'inherit' }}>
                             <li className="sidebar-item">
                                 <i className="bi bi-trash"></i> Trash
