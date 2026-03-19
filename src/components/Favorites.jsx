@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import { Link } from 'react-router-dom';
 import NoteContext from '../context/notes/NoteContext';
 import Noteitem from './Noteitem';
+import NoteModal from './NoteModal';
 
 const Favorites = () => {
     const context = useContext(NoteContext);
@@ -10,6 +11,10 @@ const Favorites = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [toastMessage, setToastMessage] = useState(null);
+
+    // Preview modal (same behavior as Notes)
+    const [selectedNote, setSelectedNote] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Local list for immediate rendering on navigation.
     // Source of truth remains context (notes/favoriteNotes) via sync effect below.
@@ -73,6 +78,16 @@ const Favorites = () => {
         setToastMessage(msg);
         setTimeout(() => setToastMessage(null), 3000);
     };
+
+    const handleExpand = useCallback((note) => {
+        setSelectedNote(note);
+        setIsModalOpen(true);
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+        setSelectedNote(null);
+    }, []);
 
     const handleRemoveFavorite = useCallback(async (id) => {
         const prev = favorites;
@@ -166,6 +181,12 @@ const Favorites = () => {
 
             {/* Main Content Area */}
             <main className="dashboard-main">
+                <NoteModal
+                    note={selectedNote}
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    onEditSuccess={() => {}}
+                />
                 {/* Top Profile Bar (match Trash) */}
                 <div className="dashboard-top">
                     <div className="search-container" style={{ visibility: 'hidden' }}>
@@ -204,7 +225,7 @@ const Favorites = () => {
                             <Noteitem
                                 key={key}
                                 note={n}
-                                onExpand={() => {}}
+                                onExpand={handleExpand}
                                 onDelete={() => {}}
                                 timestampText={getTimestampText(n)}
                                 mode="favorites"

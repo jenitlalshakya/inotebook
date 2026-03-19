@@ -72,7 +72,13 @@ const Noteitem = (props) => {
                         onClick={handleToggleFav}
                         style={{ marginLeft: 8 }}
                     >
-                        <i className={`bi ${note?.is_favorite ? 'bi-star-fill text-warning' : 'bi-star'}`} style={{ cursor: 'pointer' }}></i>
+                        <i
+                            className={`bi ${note?.is_favorite ? 'bi-star-fill' : 'bi-star'}`}
+                            style={{
+                                cursor: 'pointer',
+                                color: note?.is_favorite ? '#ffc107' : 'inherit',
+                            }}
+                        ></i>
                     </button>
                 )}
             </div>

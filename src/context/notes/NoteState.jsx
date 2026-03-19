@@ -56,6 +56,8 @@ const NoteState = (props) => {
     };
 
     // Search notes (dedicated API; does not touch notes state). Uses q= for encrypted-note search.
+    // Also normalizes `is_favorite` by merging with the current notes/favorites state in case
+    // the search endpoint omits it.
     const searchNotes = async (q, limit = 20, skip = 0) => {
         const trimmed = typeof q === "string" ? q.trim() : "";
         if (!trimmed) {
@@ -77,8 +79,33 @@ const NoteState = (props) => {
             if (!data?.success || !Array.isArray(data?.notes)) {
                 throw new Error(data?.error || "Invalid search response");
             }
+
             const notesList = data.notes || [];
-            return { notes: notesList, hasMore: notesList.length === limit };
+
+            // Build a quick lookup from existing state
+            const favIdSet = new Set((favoriteNotes || []).map((n) => n?.id ?? n?._id).filter((v) => v != null));
+            const notesFavMap = new Map(
+                (notes || [])
+                    .map((n) => [n?.id ?? n?._id, n?.is_favorite])
+                    .filter(([id]) => id != null)
+            );
+
+            const normalized = notesList.map((n) => {
+                const id = n?.id ?? n?._id;
+                if (id == null) return n;
+
+                // Prefer API value if it is a boolean
+                if (typeof n?.is_favorite === "boolean") return n;
+
+                // Otherwise merge from local state
+                if (favIdSet.has(id)) return { ...n, is_favorite: true };
+                if (notesFavMap.has(id) && typeof notesFavMap.get(id) === "boolean") {
+                    return { ...n, is_favorite: notesFavMap.get(id) };
+                }
+                return { ...n, is_favorite: false };
+            });
+
+            return { notes: normalized, hasMore: notesList.length === limit };
         } catch (error) {
             console.error("Error searching notes:", error);
             return { notes: [], hasMore: false };

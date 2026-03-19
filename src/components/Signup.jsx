@@ -152,7 +152,7 @@ const Signup = () => {
                                 className={`auth-input ${errors.name ? "is-invalid" : ""}`}
                                 id="name"
                                 name="name"
-                                placeholder="John Doe"
+                                placeholder="Jenit Lal Shakya"
                                 value={form.name}
                                 onChange={handleChange}
                                 autoComplete="name"

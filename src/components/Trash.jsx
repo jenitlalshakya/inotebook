@@ -9,6 +9,7 @@ const Trash = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [toastMessage, setToastMessage] = useState(null);
+    const [infoMessage, setInfoMessage] = useState('');
     const ownerName = localStorage.getItem("name");
 
     useEffect(() => {
@@ -57,6 +58,10 @@ const Trash = () => {
             showToast("Trash emptied");
         }
     }, [emptyTrash]);
+
+    const handleTrashNoteClick = useCallback(() => {
+        setInfoMessage("Restore to read full content");
+    }, []);
 
     const formatDateTime = (value) => {
         if (!value) return null;
@@ -150,6 +155,7 @@ const Trash = () => {
                         <p className="text-danger">Unable to load trash. Please try again later.</p>
                     )}
                     {!loading && !error && safeNotes.length === 0 && <p className="text-muted">Trash is empty.</p>}
+                    {!loading && !error && infoMessage && <p className="text-warning mb-0">{infoMessage}</p>}
                 </div>
 
                 {/* Notes Grid */}
@@ -172,6 +178,7 @@ const Trash = () => {
                             <TrashNoteItem
                                 key={key}
                                 note={n}
+                                onNoteClick={handleTrashNoteClick}
                                 onRestore={handleRestore}
                                 onDeleteForever={handleDeleteForever}
                                 timestampText={getTimestampText(n)}

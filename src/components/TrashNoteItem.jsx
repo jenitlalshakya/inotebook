@@ -1,17 +1,16 @@
 import React from 'react';
 
 const TrashNoteItem = (props) => {
-    const { note, onRestore, onDeleteForever, timestampText } = props;
+    const { note, onNoteClick, onRestore, onDeleteForever, timestampText } = props;
 
     const noteId = note?.id ?? note?._id;
     const title = note?.title ?? '';
-    const content = note?.content ?? '';
     const tag = note?.tag ?? '';
 
     const tagArray = (tag || '').split(',').map(t => t.trim()).filter(Boolean);
 
     return (
-        <div className="dash-note-card" style={{ cursor: 'default' }}>
+        <div className="dash-note-card" onClick={onNoteClick} style={{ cursor: 'pointer' }}>
             {tagArray.length > 0 && (
                 <div className="dash-note-tags-container">
                     {tagArray.slice(0, 2).map((t, i) => (
@@ -49,8 +48,6 @@ const TrashNoteItem = (props) => {
             </div>
 
             <h5 className="dash-note-title" title={title}>{title}</h5>
-            
-            <p className="dash-note-preview">{content}</p>
 
             <div className="dash-note-footer">
                 <span>{timestampText ? timestampText.replace('Created: ', '').replace('Updated: ', 'Deleted ') : 'Deleted recently'}</span>
