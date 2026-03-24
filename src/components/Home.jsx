@@ -27,9 +27,6 @@ const Home = () => {
                 <div className="ph-footer-logo">
                     <i className="bi bi-journal-text" style={{color: '#aaa', marginRight: '4px'}}></i> iNotebook
                 </div>
-                <div className="ph-footer-copy">
-                    © {new Date().getFullYear()} iNotebook Systems Inc. All rights reserved.
-                </div>
             </footer>
         </div>
     );
