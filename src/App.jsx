@@ -14,11 +14,13 @@ import Favorites from './components/Favorites';
 import SwipeUpIcon from './components/SwipeUpIcon';
 import Subscription from './components/Subscription';
 import Payment from './components/Payment';
+import PaymentSuccess from './components/PaymentSuccess';
+import PaymentFailure from './components/PaymentFailure';
 import MyFiles from './components/MyFiles';
 
 const AppLayout = () => {
     const location = useLocation();
-    const hideNavbarRoutes = ['/login', '/signup', '/subscription/payment'];
+    const hideNavbarRoutes = ['/login', '/signup', '/subscription/payment', '/subscription/success', '/subscription/failure'];
     const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
     return (
@@ -36,6 +38,8 @@ const AppLayout = () => {
                         <Route exact path="/favorites" element={<Favorites />} />
                         <Route exact path="/subscription" element={<Subscription />} />
                         <Route exact path="/subscription/payment" element={<Payment />} />
+                        <Route exact path="/subscription/success" element={<PaymentSuccess />} />
+                        <Route exact path="/subscription/failure" element={<PaymentFailure />} />
                         <Route exact path="/files" element={<MyFiles />} />
                     </Routes>
                     <SwipeUpIcon />
