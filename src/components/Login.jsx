@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AuthContext from "../context/auth/AuthContext";
 import "./Auth.css";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,6 +14,7 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { refreshProfile } = useContext(AuthContext);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -81,8 +83,10 @@ const Login = () => {
             }
 
             if (data.email) {
-                localStorage.setItem("email", email);
+                localStorage.setItem("email", form.email.trim());
             }
+            
+            refreshProfile();
             navigate("/");
         } catch (err) {
             setApiError("Unable to connect to the server. Please try again.");

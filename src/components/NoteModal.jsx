@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
 import NoteContext from "../context/notes/NoteContext"
+import AuthContext from "../context/auth/AuthContext"
 
 const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
     const context = useContext(NoteContext);
     const { editNote } = context;
+    const { user, planConfig } = useContext(AuthContext);
 
     const [isEditMode, setIsEditMode] = useState(false);
     const [editError, setEditError] = useState(null);
@@ -61,6 +63,9 @@ const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
     const title = note?.title ?? '';
     const content = note?.content ?? '';
     const tag = note?.tag ?? '';
+    
+    const wordCount = editNoteState.econtent.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const wordLimit = user?.plan === "free" && planConfig?.free?.words_limit ? planConfig.free.words_limit : 0;
 
     const tagArray = (tag || '').split(',').map(t => t.trim()).filter(Boolean);
 
@@ -129,7 +134,7 @@ const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
                                     type="button"
                                     className="btn btn-sm btn-dark"
                                     onClick={handleSaveEdit}
-                                    disabled={editNoteState.etitle.length < 3 || editNoteState.econtent.length < 5}
+                                    disabled={editNoteState.etitle.length < 3 || editNoteState.econtent.length < 5 || (wordLimit > 0 && wordCount > wordLimit)}
                                 >
                                     Save
                                 </button>
@@ -147,15 +152,22 @@ const NoteModal = ({ note, isOpen, onClose, onEditSuccess }) => {
                 <div className="modal-note-body">
                     {editError ? <div className="alert alert-danger mb-3">{editError}</div> : null}
                     {isEditMode ? (
-                        <textarea
-                            className="modal-note-content-input"
-                            name="econtent"
-                            value={editNoteState.econtent}
-                            onChange={handleEditChange}
-                            minLength={5}
-                            required
-                            placeholder="Write your note content here..."
-                        />
+                        <>
+                            <textarea
+                                className="modal-note-content-input"
+                                name="econtent"
+                                value={editNoteState.econtent}
+                                onChange={handleEditChange}
+                                minLength={5}
+                                required
+                                placeholder="Write your note content here..."
+                            />
+                            {wordLimit > 0 && (
+                                <div className={`text-end small ${wordCount > wordLimit ? 'text-danger fw-bold' : 'text-muted'}`}>
+                                    {wordCount} / {wordLimit} words
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <div className="modal-note-content">{content}</div>
                     )}

@@ -6,15 +6,19 @@ import Home from './components/Home';
 import About from './components/About';
 import Profile from './components/Profile';
 import NoteState from './context/notes/NoteState';
+import AuthState from './context/auth/AuthState';
 import Signup from './components/Signup';
 import Login from './components/Login';
 import Trash from './components/Trash';
 import Favorites from './components/Favorites';
 import SwipeUpIcon from './components/SwipeUpIcon';
+import Subscription from './components/Subscription';
+import Payment from './components/Payment';
+import MyFiles from './components/MyFiles';
 
 const AppLayout = () => {
     const location = useLocation();
-    const hideNavbarRoutes = ['/login', '/signup'];
+    const hideNavbarRoutes = ['/login', '/signup', '/subscription/payment'];
     const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
     return (
@@ -30,6 +34,9 @@ const AppLayout = () => {
                         <Route exact path="/signup" element={<Signup />} />
                         <Route exact path="/trash" element={<Trash />} />
                         <Route exact path="/favorites" element={<Favorites />} />
+                        <Route exact path="/subscription" element={<Subscription />} />
+                        <Route exact path="/subscription/payment" element={<Payment />} />
+                        <Route exact path="/files" element={<MyFiles />} />
                     </Routes>
                     <SwipeUpIcon />
                 </div>
@@ -42,11 +49,13 @@ const AppLayout = () => {
 function App() {
     return (
         <>
-            <NoteState>
-                <Router>
-                    <AppLayout />
-                </Router>
-            </NoteState>
+            <AuthState>
+                <NoteState>
+                    <Router>
+                        <AppLayout />
+                    </Router>
+                </NoteState>
+            </AuthState>
         </>
     )
 }

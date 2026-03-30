@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import NoteContext from "../context/notes/NoteContext"
+import AuthContext from "../context/auth/AuthContext"
 import Noteitem from './Noteitem';
 import AddNote from './Addnote';
 import NoteModal from './NoteModal';
@@ -11,6 +12,7 @@ const SEARCH_DEBOUNCE_MS = 400;
 
 const Notes = () => {
     const context = useContext(NoteContext);
+    const { user, planConfig } = useContext(AuthContext);
     const { notes, totalNotes, deleteNote, getNotes, searchNotes } = context;
     const [selectedNote, setSelectedNote] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,7 +20,11 @@ const Notes = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const ownerName = localStorage.getItem("name");
+    const ownerName = user?.name || localStorage.getItem("name") || "User";
+    
+    const isPro = user?.plan && user.plan !== "free";
+    const notesLimit = planConfig && user?.plan === "free" ? planConfig.free.notes_limit : Infinity;
+    const notesLimitReached = totalNotes >= notesLimit;
 
     // --- Search state (isolated from normal notes) ---
     const [searchQuery, setSearchQuery] = useState("");
@@ -263,10 +269,13 @@ const Notes = () => {
                         </Link>
                     </ul>
 
-                    <div className="sidebar-premium-card">
-                        <h4>Go Premium</h4>
-                        <p>Unlock cloud sync and unlimited notebooks.</p>
-                    </div>
+                    {!isPro && (
+                        <div className="sidebar-premium-card mt-4">
+                            <h4>Go Premium</h4>
+                            <p>Unlock unlimited notes, 5GB storage, and file attachments.</p>
+                            <Link to="/subscription" className="btn btn-sm btn-warning w-100 fw-bold">Upgrade Now</Link>
+                        </div>
+                    )}
                 </aside>
 
                 {/* Main Content Area */}
@@ -286,8 +295,8 @@ const Notes = () => {
                         </div>
                         <div className="profile-container">
                             <div className="profile-info">
-                                <div className="profile-name">{ownerName || "A"}</div>
-                                <div className="profile-status">Pro Member</div>
+                                <div className="profile-name">{ownerName}</div>
+                                <div className="profile-status text-capitalize">{user?.plan === "free" ? "Free Member" : "Pro Member"}</div>
                             </div>
                             <div className="profile-avatar">
                                 <Link to="/profile"><i className="bi bi-person-fill" style={{ color: '#c2410c' }}></i></Link>
@@ -296,7 +305,17 @@ const Notes = () => {
                     </div>
 
                     {/* Inline Add Note Editor */}
-                    {!isSearchMode && <AddNote />}
+                    {!isSearchMode && (
+                        notesLimitReached ? (
+                            <div className="alert alert-warning p-4 mb-4 rounded shadow-sm">
+                                <h5><i className="bi bi-exclamation-triangle-fill text-warning me-2"></i> Note Limit Reached</h5>
+                                <p className="mb-2">You have reached the maximum limit of {notesLimit} notes on the Free plan.</p>
+                                <Link to="/subscription" className="btn btn-warning fw-bold">Upgrade to Pro</Link>
+                            </div>
+                        ) : (
+                            <AddNote />
+                        )
+                    )}
 
                     {/* Status Messages */}
                     <div className="mb-3">

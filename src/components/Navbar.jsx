@@ -1,17 +1,21 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import AuthContext from "../context/auth/AuthContext";
+import NoteContext from "../context/notes/NoteContext";
 import "./Navbar.css";
 
 const Navbar = (props) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user, logout } = useContext(AuthContext);
+    const { clearNotes } = useContext(NoteContext);
     const token = localStorage.getItem("token");
     const isAuthenticated = !!token;
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/");
-        window.location.reload();
+        logout();
+        clearNotes();
+        navigate("/login");
     };
 
     return (
@@ -28,10 +32,13 @@ const Navbar = (props) => {
                     <>
                         {/* Authenticated Links */}
                         <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>Notes</Link>
+                        <Link to="/files" className={`nav-link ${location.pathname === "/files" ? "active" : ""}`}>My Files</Link>
                         <Link to="/favorites" className={`nav-link ${location.pathname === "/favorites" ? "active" : ""}`}>Favorites</Link>
                         <Link to="/trash" className={`nav-link ${location.pathname === "/trash" ? "active" : ""}`}>Trash</Link>
                         <Link to="/profile" className={`nav-link ${location.pathname === "/profile" ? "active" : ""}`}>Profile</Link>
-                        {/* You can add more app-specific links here if needed */}
+                        <Link to="/subscription" className={`nav-link ${location.pathname === "/subscription" ? "active" : ""}`}>
+                            {user && user.plan !== "free" ? <span className="badge bg-primary ms-1">PRO</span> : <span className="badge bg-secondary ms-1">Upgrade</span>}
+                        </Link>
                     </>
                 ) : (
                     <>

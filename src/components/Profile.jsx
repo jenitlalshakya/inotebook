@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "../context/auth/AuthContext";
+import NoteContext from "../context/notes/NoteContext";
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 const MIN_PASSWORD_LENGTH = 6;
@@ -21,6 +23,9 @@ const Profile = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [changePasswordLoading, setChangePasswordLoading] = useState(false);
     const navigate = useNavigate();
+
+    const { logout } = useContext(AuthContext);
+    const { clearNotes } = useContext(NoteContext);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -45,8 +50,8 @@ const Profile = () => {
 
                 if (!response.ok || data.success === false) {
                     if (response.status === 401) {
-                        localStorage.removeItem("token");
-                        localStorage.removeItem("name");
+                        logout();
+                        clearNotes();
                         navigate("/login");
                         return;
                     }
@@ -65,11 +70,11 @@ const Profile = () => {
         };
 
         fetchProfile();
-    }, [navigate]);
+    }, [navigate, logout, clearNotes]);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("name");
+        logout();
+        clearNotes();
         navigate("/login");
     };
 
@@ -103,9 +108,9 @@ const Profile = () => {
                 return;
             }
 
-            localStorage.removeItem("token");
-            localStorage.removeItem("name");
-            navigate("/");
+            logout();
+            clearNotes();
+            navigate("/login");
         } catch (err) {
             setError("Unable to connect to the server. Please try again.");
         } finally {
@@ -174,8 +179,8 @@ const Profile = () => {
 
             if (!response.ok || data.success === false) {
                 if (response.status === 401) {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("name");
+                    logout();
+                    clearNotes();
                     navigate("/login");
                     return;
                 }
@@ -186,9 +191,8 @@ const Profile = () => {
             setPasswordSuccess("Password changed successfully. Redirecting you to login...");
             setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
 
-            // Clear auth data and redirect to login after a short delay
-            localStorage.removeItem("token");
-            localStorage.removeItem("name");
+            logout();
+            clearNotes();
             setTimeout(() => {
                 navigate("/login");
             }, 1500);

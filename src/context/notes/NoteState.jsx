@@ -374,8 +374,16 @@ const NoteState = (props) => {
         }
     };
 
+    // Clear all notes state (useful for logout)
+    const clearNotes = () => {
+        setNotes([]);
+        setTotalNotes(0);
+        setTrashNotes([]);
+        setFavoriteNotes([]);
+    };
+
     return (
-        <NoteContext.Provider value={{ notes, totalNotes, trashNotes, favoriteNotes, addNote, deleteNote, editNote, getNotes, searchNotes, getTrashNotes, deletePermanentNote, emptyTrash, restoreNote, toggleFavorite, removeFavorite, getFavoriteNotes }}>
+        <NoteContext.Provider value={{ notes, totalNotes, trashNotes, favoriteNotes, addNote, deleteNote, editNote, getNotes, searchNotes, getTrashNotes, deletePermanentNote, emptyTrash, restoreNote, toggleFavorite, removeFavorite, getFavoriteNotes, clearNotes }}>
             {props.children}
         </NoteContext.Provider>
     );
