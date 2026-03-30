@@ -16,6 +16,9 @@ This SPA (single-page application) provides the user interface for authenticatio
 - **Responsive Bootstrap UI** that works across desktop and mobile.
 - **Integration with Django REST API** via the Fetch API.
 - **Client-side state management** with the React Context API.
+- **Upgrade Plan page**: Compare Free and Paid subscription tiers and initiate a plan upgrade directly from the UI.
+- **File upload system** (Paid plan only): Upload and manage files attached to your notes.
+- **Demo payment flow** via eSewa sandbox: monthly (₹299) and yearly (₹2,999) billing supported.
 
 ---
 
@@ -144,6 +147,39 @@ If the variable is not set, code may fall back to a sane default (such as `http:
 
 ---
 
+## Subscription & Payments
+
+iNotebook offers two subscription tiers accessible from the **Upgrade Plan** page (`/upgrade`).
+
+### Plans
+
+| Feature | Free Plan | Paid Plan |
+|---|---|---|
+| Notes | Limited (up to 50) | Unlimited |
+| File uploads | ✗ | ✓ |
+| Pro features | ✗ | ✓ |
+| Price | Free | ₹299 / month **or** ₹2,999 / year |
+
+### Pro Features (Paid Plan)
+
+- **Unlimited notes** — no cap on the number of notes you can create.
+- **File upload system** — attach files to notes; managed via a dedicated file manager UI.
+- **Priority access** to new features as they roll out.
+
+### Payment Integration
+
+> **⚠️ Demo / Sandbox Only**  
+> The current payment flow uses the **eSewa sandbox** environment. No real money is charged.  
+> Use eSewa's [sandbox test credentials](https://developer.esewa.com.np/) when prompted during checkout.
+
+- Clicking **Upgrade** on the plan page triggers a POST to the Django backend (`/subscription/payment/`).
+- The backend generates a secure HMAC-SHA256 signature and redirects the browser to the eSewa sandbox checkout page.
+- On successful payment, eSewa redirects back to `/subscription/success/`, which verifies the transaction and activates the chosen plan.
+- On failure or cancellation, the user is redirected to `/subscription/failure/` with an appropriate message.
+- The React frontend reads the active plan from the user context and updates the UI immediately (file upload controls, note limits, badges) without a page reload.
+
+---
+
 ## Future Improvements
 
 Potential enhancements for the iNotebook frontend:
@@ -154,6 +190,7 @@ Potential enhancements for the iNotebook frontend:
 - **Note tagging system** for better organization.
 - **In-app notifications** (e.g. for sync status, errors, and updates).
 - **Offline support** and local caching for notes.
+- **Live payment integration** — replace eSewa sandbox with a production payment gateway.
 
 ---
 
