@@ -24,7 +24,7 @@ const MyFiles = () => {
     const fetchFiles = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${host}/api/files/list`, {
+            const res = await fetch(`${host}/api/files/list/`, {
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
@@ -67,7 +67,7 @@ const MyFiles = () => {
         formData.append("file", file);
 
         try {
-            const res = await fetch(`${host}/api/files/upload`, {
+            const res = await fetch(`${host}/api/files/upload/`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -89,11 +89,38 @@ const MyFiles = () => {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
+    const handleDownload = async (fileId, fileName) => {
+        try {
+            const res = await fetch(`${host}/api/files/download/${fileId}/`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+
+            if (!res.ok) throw new Error("Download failed");
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+        } catch (err) {
+            console.error(err);
+            alert("Failed to download file");
+        }
+    };
+
     const handleDelete = async (fileId) => {
         if (!window.confirm("Are you sure you want to delete this file?")) return;
 
         try {
-            const res = await fetch(`${host}/api/files/delete/${fileId}`, {
+            const res = await fetch(`${host}/api/files/delete/${fileId}/`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -218,9 +245,9 @@ const MyFiles = () => {
                                             <td>{formatBytes(f.file_size)}</td>
                                             <td>{new Date(f.created_at).toLocaleString()}</td>
                                             <td className="text-end">
-                                                <a href={host + f.file_url} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-info me-2">
+                                                <button className="btn btn-sm btn-outline-info me-2" onClick={() => handleDownload(f.id, f.file_name)}>
                                                     <i className="bi bi-download"></i>
-                                                </a>
+                                                </button>
                                                 <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(f.id)}>
                                                     <i className="bi bi-trash"></i>
                                                 </button>
