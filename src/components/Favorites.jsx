@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import NoteContext from '../context/notes/NoteContext';
 import Noteitem from './Noteitem';
 import NoteModal from './NoteModal';
+import Layout from './Layout';
 
 const Favorites = () => {
     const context = useContext(NoteContext);
@@ -151,92 +152,67 @@ const Favorites = () => {
     }, [safeFavorites]);
 
     return (
-        <div className="dashboard-container">
-            {/* Sidebar Menu (match Trash) */}
-            <aside className="dashboard-sidebar">
-                <h3 className="sidebar-section-title">Library</h3>
-                <ul className="sidebar-menu">
-                    <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <li className="sidebar-item">
-                            <i className="bi bi-journal-text"></i> All Notes
-                        </li>
-                    </Link>
-                    <Link to="/favorites" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <li className="sidebar-item active">
-                            <i className="bi bi-star"></i> Favorites
-                        </li>
-                    </Link>
-                    <Link to="/trash" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <li className="sidebar-item">
-                            <i className="bi bi-trash"></i> Trash
-                        </li>
-                    </Link>
-                </ul>
+        <>
+            <Layout>
+                <main className="dashboard-main">
+                    <NoteModal
+                        note={selectedNote}
+                        isOpen={isModalOpen}
+                        onClose={handleCloseModal}
+                        onEditSuccess={() => {}}
+                    />
 
-                <div className="sidebar-premium-card">
-                    <h4>Go Premium</h4>
-                    <p>Unlock cloud sync and unlimited notebooks.</p>
-                </div>
-            </aside>
-
-            {/* Main Content Area */}
-            <main className="dashboard-main">
-                <NoteModal
-                    note={selectedNote}
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    onEditSuccess={() => {}}
-                />
-                {/* Top Profile Bar (match Trash) */}
-                <div className="dashboard-top">
-                    <div className="search-container" style={{ visibility: 'hidden' }}>
-                        {/* Placeholder to keep alignment */}
-                    </div>
-                    <div className="profile-container">
-                        <div className="profile-info">
-                            <div className="profile-name">{ownerName || 'A'}</div>
-                            <div className="profile-status">Pro Member</div>
+                    {/* Top Profile Bar */}
+                    <div className="dashboard-top">
+                        <div className="search-container" style={{ visibility: 'hidden' }}>
+                            {/* Placeholder to keep alignment */}
                         </div>
-                        <div className="profile-avatar">
-                            <Link to="/profile"><i className="bi bi-person-fill" style={{ color: '#c2410c' }}></i></Link>
+                        <div className="profile-container">
+                            <div className="profile-info">
+                                <div className="profile-name">{ownerName || 'A'}</div>
+                                <div className="profile-status">Pro Member</div>
+                            </div>
+                            <div className="profile-avatar">
+                                <Link to="/profile"><i className="bi bi-person-fill" style={{ color: '#c2410c' }}></i></Link>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Status Messages */}
-                <div className="mb-3">
-                    {loading && <p className="text-muted">Loading favorites...</p>}
-                    {!loading && error && (
-                        <p className="text-danger">Unable to load favorites. Please try again later.</p>
-                    )}
-                    {!loading && !error && safeFavorites.length === 0 && <p className="text-muted">No favorite notes yet</p>}
-                </div>
+                    {/* Status Messages */}
+                    <div className="mb-3">
+                        {loading && <p className="text-muted">Loading favorites...</p>}
+                        {!loading && error && (
+                            <p className="text-danger">Unable to load favorites. Please try again later.</p>
+                        )}
+                        {!loading && !error && safeFavorites.length === 0 && <p className="text-muted">No favorite notes yet</p>}
+                    </div>
 
-                {/* Notes Grid (match Notes/Trash) */}
-                <h2 className="notes-section-title">
-                    Favorites
-                    <span className="notes-badge">{safeFavorites.length}</span>
-                </h2>
+                    {/* Notes Grid */}
+                    <h2 className="notes-section-title">
+                        Favorites
+                        <span className="notes-badge">{safeFavorites.length}</span>
+                    </h2>
 
-                <div className="notes-grid">
-                    {sortedFavorites.map((n, idx) => {
-                        const key = n?.id ?? n?._id ?? idx;
-                        return (
-                            <Noteitem
-                                key={key}
-                                note={n}
-                                onExpand={handleExpand}
-                                onDelete={() => {}}
-                                timestampText={getTimestampText(n)}
-                                mode="favorites"
-                                onRemoveFavorite={handleRemoveFavorite}
-                            />
-                        );
-                    })}
-                </div>
-            </main>
+                    <div className="notes-grid">
+                        {sortedFavorites.map((n, idx) => {
+                            const key = n?.id ?? n?._id ?? idx;
+                            return (
+                                <Noteitem
+                                    key={key}
+                                    note={n}
+                                    onExpand={handleExpand}
+                                    onDelete={() => {}}
+                                    timestampText={getTimestampText(n)}
+                                    mode="favorites"
+                                    onRemoveFavorite={handleRemoveFavorite}
+                                />
+                            );
+                        })}
+                    </div>
+                </main>
+            </Layout>
 
-            {/* Toast Notification (match Trash) */}
+            {/* Toast renders outside Layout so it floats above all content */}
             {toastMessage && (
                 <div style={{
                     position: 'fixed',
@@ -264,7 +240,7 @@ const Favorites = () => {
                     100% { opacity: 0; transform: translateY(20px); pointer-events: none; }
                 }
             `}</style>
-        </div>
+        </>
     );
 };
 

@@ -6,6 +6,7 @@ import Noteitem from './Noteitem';
 import AddNote from './Addnote';
 import NoteModal from './NoteModal';
 import { Link } from 'react-router-dom';
+import Layout from './Layout';
 
 const LIMIT = 20;
 const SEARCH_DEBOUNCE_MS = 400;
@@ -249,36 +250,8 @@ const Notes = () => {
                 onEditSuccess={handleEditSuccess}
             />
 
-            <div className="dashboard-container">
-                {/* Sidebar Menu */}
-                <aside className="dashboard-sidebar">
-                    <h3 className="sidebar-section-title">Library</h3>
-                    <ul className="sidebar-menu">
-                        <li className="sidebar-item active">
-                            <i className="bi bi-journal-text"></i> All Notes
-                        </li>
-                        <Link to="/favorites" style={{ textDecoration: 'none', color: 'inherit' }}>
-                            <li className={`sidebar-item ${window.location.pathname === '/favorites' ? 'active' : ''}`}>
-                                <i className="bi bi-star"></i> Favorites
-                            </li>
-                        </Link>
-                        <Link to="/trash" style={{ textDecoration: 'none', color: 'inherit' }}>
-                            <li className="sidebar-item">
-                                <i className="bi bi-trash"></i> Trash
-                            </li>
-                        </Link>
-                    </ul>
-
-                    {!isPro && (
-                        <div className="sidebar-premium-card mt-4">
-                            <h4>Go Premium</h4>
-                            <p>Unlock unlimited notes, 5GB storage, and file attachments.</p>
-                            <Link to="/subscription" className="btn btn-sm btn-warning w-100 fw-bold">Upgrade Now</Link>
-                        </div>
-                    )}
-                </aside>
-
-                {/* Main Content Area */}
+            {/* Layout provides the sidebar + dashboard-container shell */}
+            <Layout>
                 <main className="dashboard-main">
                     {/* Top Search & Profile Bar */}
                     <div className="dashboard-top">
@@ -330,7 +303,7 @@ const Notes = () => {
 
                     {/* Notes Grid */}
                     <h2 className="notes-section-title">
-                        {isSearchMode ? "Search Results" : "Recent Notes"} 
+                        {isSearchMode ? "Search Results" : "Recent Notes"}
                         <span className="notes-badge">{isSearchMode ? sortedSearchResults.length : totalNotes}</span>
                     </h2>
 
@@ -384,7 +357,7 @@ const Notes = () => {
                         </InfiniteScroll>
                     )}
                 </main>
-            </div>
+            </Layout>
         </>
     )
 }

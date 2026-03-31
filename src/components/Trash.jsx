@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import NoteContext from "../context/notes/NoteContext";
 import TrashNoteItem from './TrashNoteItem';
 import { Link } from 'react-router-dom';
+import Layout from './Layout';
 
 const Trash = () => {
     const context = useContext(NoteContext);
@@ -14,7 +15,7 @@ const Trash = () => {
 
     useEffect(() => {
         let mounted = true;
-        
+
         const load = async () => {
             if (loading) return;
             setLoading(true);
@@ -102,93 +103,67 @@ const Trash = () => {
     }, [safeNotes]);
 
     return (
-        <div className="dashboard-container">
-            {/* Sidebar Menu */}
-            <aside className="dashboard-sidebar">
-                <h3 className="sidebar-section-title">Library</h3>
-                <ul className="sidebar-menu">
-                    <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <li className="sidebar-item">
-                            <i className="bi bi-journal-text"></i> All Notes
-                        </li>
-                    </Link>
-                    <Link to="/favorites" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <li className="sidebar-item">
-                            <i className="bi bi-star"></i> Favorites
-                        </li>
-                    </Link>
-                    <Link to="/trash" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <li className="sidebar-item active">
-                            <i className="bi bi-trash"></i> Trash
-                        </li>
-                    </Link>
-                </ul>
-
-                <div className="sidebar-premium-card">
-                    <h4>Go Premium</h4>
-                    <p>Unlock cloud sync and unlimited notebooks.</p>
-                </div>
-            </aside>
-
-            {/* Main Content Area */}
-            <main className="dashboard-main">
-                {/* Top Profile Bar */}
-                <div className="dashboard-top">
-                    <div className="search-container" style={{ visibility: 'hidden' }}>
-                        {/* Placeholder to keep alignment */}
-                    </div>
-                    <div className="profile-container">
-                        <div className="profile-info">
-                            <div className="profile-name">{ownerName || "A"}</div>
-                            <div className="profile-status">Pro Member</div>
+        <>
+            <Layout>
+                <main className="dashboard-main">
+                    {/* Top Profile Bar */}
+                    <div className="dashboard-top">
+                        <div className="search-container" style={{ visibility: 'hidden' }}>
+                            {/* Placeholder to keep alignment */}
                         </div>
-                        <div className="profile-avatar">
-                            <Link to="/profile"><i className="bi bi-person-fill" style={{ color: '#c2410c' }}></i></Link>
+                        <div className="profile-container">
+                            <div className="profile-info">
+                                <div className="profile-name">{ownerName || "A"}</div>
+                                <div className="profile-status">Pro Member</div>
+                            </div>
+                            <div className="profile-avatar">
+                                <Link to="/profile"><i className="bi bi-person-fill" style={{ color: '#c2410c' }}></i></Link>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Status Messages */}
-                <div className="mb-3">
-                    {loading && <p className="text-muted">Loading trash...</p>}
-                    {!loading && error && (
-                        <p className="text-danger">Unable to load trash. Please try again later.</p>
-                    )}
-                    {!loading && !error && safeNotes.length === 0 && <p className="text-muted">Trash is empty.</p>}
-                    {!loading && !error && infoMessage && <p className="text-warning mb-0">{infoMessage}</p>}
-                </div>
+                    {/* Status Messages */}
+                    <div className="mb-3">
+                        {loading && <p className="text-muted">Loading trash...</p>}
+                        {!loading && error && (
+                            <p className="text-danger">Unable to load trash. Please try again later.</p>
+                        )}
+                        {!loading && !error && safeNotes.length === 0 && <p className="text-muted">Trash is empty.</p>}
+                        {!loading && !error && infoMessage && <p className="text-warning mb-0">{infoMessage}</p>}
+                    </div>
 
-                {/* Notes Grid */}
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h2 className="notes-section-title mb-0">
-                        Trash 
-                        <span className="notes-badge">{safeNotes.length}</span>
-                    </h2>
-                    {safeNotes.length > 0 && (
-                        <button className="btn btn-outline-danger" onClick={handleEmptyTrash}>
-                            <i className="bi bi-trash me-1"></i> Empty Bin
-                        </button>
-                    )}
-                </div>
+                    {/* Notes Grid */}
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h2 className="notes-section-title mb-0">
+                            Trash
+                            <span className="notes-badge">{safeNotes.length}</span>
+                        </h2>
+                        {safeNotes.length > 0 && (
+                            <button className="btn btn-outline-danger" onClick={handleEmptyTrash}>
+                                <i className="bi bi-trash me-1"></i> Empty Bin
+                            </button>
+                        )}
+                    </div>
 
-                <div className="notes-grid">
-                    {sortedNotes.map((n, idx) => {
-                        const key = n?.id ?? n?._id ?? idx;
-                        return (
-                            <TrashNoteItem
-                                key={key}
-                                note={n}
-                                onNoteClick={handleTrashNoteClick}
-                                onRestore={handleRestore}
-                                onDeleteForever={handleDeleteForever}
-                                timestampText={getTimestampText(n)}
-                            />
-                        );
-                    })}
-                </div>
-            </main>
+                    <div className="notes-grid">
+                        {sortedNotes.map((n, idx) => {
+                            const key = n?.id ?? n?._id ?? idx;
+                            return (
+                                <TrashNoteItem
+                                    key={key}
+                                    note={n}
+                                    onNoteClick={handleTrashNoteClick}
+                                    onRestore={handleRestore}
+                                    onDeleteForever={handleDeleteForever}
+                                    timestampText={getTimestampText(n)}
+                                />
+                            );
+                        })}
+                    </div>
+                </main>
+            </Layout>
 
-            {/* Toast Notification */}
+            {/* Toast renders outside Layout so it floats above all content */}
             {toastMessage && (
                 <div style={{
                     position: 'fixed',
@@ -216,7 +191,7 @@ const Trash = () => {
                     100% { opacity: 0; transform: translateY(20px); pointer-events: none; }
                 }
             `}</style>
-        </div>
+        </>
     );
 };
 

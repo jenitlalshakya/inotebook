@@ -1,15 +1,18 @@
 /* Navbar.css */
 
+/* ─── Base Layout ─────────────────────────────────────────────── */
 .custom-navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 5%;
+    padding: 1.2rem 5%;
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
+    position: relative;
 }
 
+/* ─── Logo ───────────────────────────────────────────────────── */
 .nav-logo {
     display: flex;
     align-items: center;
@@ -18,8 +21,9 @@
     font-size: 1.25rem;
     color: #1a1a1a;
     text-decoration: none;
+    z-index: 1001;
 }
-  
+
 .nav-logo-icon {
     background-color: #0d4a46;
     color: white;
@@ -31,31 +35,53 @@
 .nav-logo-text {
     color: #115740;
 }
-  
+
+/* ─── Desktop Nav Links ──────────────────────────────────────── */
 .nav-links {
     display: flex;
     gap: 2rem;
+    align-items: center;
 }
-  
+
 .nav-link {
     color: #555;
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 500;
     transition: color 0.2s;
+    position: relative;
+    padding-bottom: 2px;
 }
-  
-.nav-link:hover, .nav-link.active {
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #0d4a46;
+    border-radius: 2px;
+    transition: width 0.25s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+}
+
+.nav-link:hover,
+.nav-link.active {
     color: #0d4a46;
 }
-  
+
+/* ─── Desktop Action Buttons ─────────────────────────────────── */
 .nav-actions {
     display: flex;
     gap: 1rem;
     align-items: center;
 }
 
-/* Public Login Button */
 .nav-btn-light {
     display: flex;
     align-items: center;
@@ -68,15 +94,15 @@
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.15s;
 }
-  
+
 .nav-btn-light:hover {
     background-color: #dcedec;
     color: #0d4a46;
+    transform: translateY(-1px);
 }
 
-/* Authenticated/Action Button */
 .nav-btn-danger {
     background-color: #ef4444;
     color: white;
@@ -86,15 +112,182 @@
     text-decoration: none;
     border: none;
     cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s;
 }
 
 .nav-btn-danger:hover {
     background-color: #dc2626;
     color: white;
+    transform: translateY(-1px);
 }
 
+/* ─── Hamburger Button ───────────────────────────────────────── */
+.hamburger-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 1001;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.hamburger-btn:hover {
+    background: #f0f4f4;
+}
+
+.hamburger-line {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: #1a1a1a;
+    border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+    transform-origin: center;
+}
+
+/* Animate to "X" when open */
+.hamburger-btn.open .hamburger-line:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+.hamburger-btn.open .hamburger-line:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+.hamburger-btn.open .hamburger-line:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ─── Mobile Menu Overlay ────────────────────────────────────── */
+.mobile-menu {
+    display: none; /* hidden on desktop */
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(320px, 85vw);
+    height: 100vh;
+    background: #ffffff;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    padding-top: 5rem;
+}
+
+.mobile-menu--open {
+    transform: translateX(0);
+}
+
+/* Mobile nav link styles */
+.mobile-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 1rem 2rem;
+    gap: 0.25rem;
+}
+
+.mobile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    color: #374151;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+
+.mobile-nav-link:hover {
+    background: #f1f5f9;
+    color: #0d4a46;
+    transform: translateX(4px);
+}
+
+.mobile-nav-link.active {
+    background: #e8f5f2;
+    color: #0d4a46;
+    font-weight: 600;
+}
+
+.mobile-nav-link i {
+    font-size: 1.1rem;
+    width: 22px;
+    text-align: center;
+    color: inherit;
+}
+
+.mobile-menu-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 0.5rem 0.5rem;
+}
+
+.mobile-nav-logout {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    color: #ef4444;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: background 0.15s, transform 0.15s;
+}
+
+.mobile-nav-logout:hover {
+    background: #fef2f2;
+    transform: translateX(4px);
+}
+
+.mobile-nav-link--cta {
+    color: #0d4a46;
+    background: #eaf1f1;
+    font-weight: 600;
+}
+
+.mobile-nav-link--cta:hover {
+    background: #dcedec;
+}
+
+.mobile-nav-link--signup {
+    background: #0d4a46;
+    color: white !important;
+    justify-content: center;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.mobile-nav-link--signup:hover {
+    background: #0a3a37;
+    color: white !important;
+    transform: none;
+}
+
+/* ─── Responsive Breakpoints ─────────────────────────────────── */
 @media (max-width: 768px) {
-    .nav-links {
-      display: none;
+    .nav-links,
+    .nav-actions {
+        display: none;
+    }
+
+    .hamburger-btn {
+        display: flex;
+    }
+
+    .mobile-menu {
+        display: block;
     }
 }
