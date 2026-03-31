@@ -237,10 +237,8 @@ const MyFiles = () => {
                                     {!loading && files.map(f => (
                                         <tr key={f.id}>
                                             <td>
-                                                <a href={host + f.file_url} target="_blank" rel="noreferrer" className="text-decoration-none">
-                                                    <i className="bi bi-file-earmark-text me-2"></i>
-                                                    {f.file_name}
-                                                </a>
+                                                <i className="bi bi-file-earmark-text me-2"></i>
+                                                {f.file_name}
                                             </td>
                                             <td>{formatBytes(f.file_size)}</td>
                                             <td>{new Date(f.created_at).toLocaleString()}</td>
