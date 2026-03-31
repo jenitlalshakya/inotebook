@@ -55,9 +55,8 @@ const Sidebar = () => {
                 <NavLink
                     to="/files"
                     className={({ isActive }) =>
-                        `sidebar-item${isActive ? " active" : ""}`
+                        `sidebar-item sidebar-item-files-link${isActive ? " active" : ""}`
                     }
-                    style={{ marginBottom: "0.5rem" }}
                 >
                     <i className="bi bi-folder2-open"></i> My Files
                 </NavLink>
