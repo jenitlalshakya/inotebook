@@ -172,6 +172,23 @@ iNotebook offers two subscription tiers accessible from the **Upgrade Plan** pag
 > The current payment flow uses the **eSewa sandbox** environment. No real money is charged.  
 > Use eSewa's [sandbox test credentials](https://developer.esewa.com.np/) when prompted during checkout.
 
+### 🧪 eSewa Sandbox Test Credentials
+Use these accounts for testing payments in the sandbox:
+
+**Test Accounts:**
+- 9806800001
+- 9806800002
+- 9806800003
+- 9806800004
+- 9806800005
+
+**Credentials for all accounts:**
+- Password: Nepal@123
+- MPIN: 1122
+- OTP: 123456
+
+> ⚠️ These credentials are for eSewa sandbox only. Do not use them for real transactions.
+
 - Clicking **Upgrade** on the plan page triggers a POST to the Django backend (`/subscription/payment/`).
 - The backend generates a secure HMAC-SHA256 signature and redirects the browser to the eSewa sandbox checkout page.
 - On successful payment, eSewa redirects back to `/subscription/success/`, which verifies the transaction and activates the chosen plan.
